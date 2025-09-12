@@ -3,10 +3,13 @@
 import Image from 'next/image';
 import { Kanit } from 'next/font/google';
 import { Heart, Search, ShieldCheck, Star } from 'lucide-react';
+import {useRouter} from 'next/navigation';
 
 const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] });
 
 export default function HomePage() {
+  const router = useRouter();
+
   return (
     <main className={`${kanit.className} min-h-screen flex items-center justify-center mt-16 bg-[#FEEDF633]`}>
       <div className="w-full max-w-[1200px] px-6 flex flex-col md:flex-row items-center justify-center gap-8">
@@ -22,7 +25,8 @@ export default function HomePage() {
           </header>
 
           <div className="flex items-center gap-3">
-            <button className="h-11 px-4 rounded-md text-sm text-white font-semibold bg-gradient-to-r from-pink-600 to-rose-500 shadow">
+            <button className="h-11 px-4 rounded-md text-sm text-white font-semibold bg-gradient-to-r from-pink-600 to-rose-500 shadow"
+            onClick = {(e) => {router.push('/service')}}>
               <div className="flex flex-row justify-center items-center gap-2">
                 <Search size={16} />
                 <span>เริ่มค้นหาเลย</span>
@@ -39,7 +43,7 @@ export default function HomePage() {
           <div className="grid grid-cols-3 gap-6">
             <div>
               <div className="text-[28px] flex justify-center font-bold text-pink-600 mb-2">1,200+</div>
-              <div className="text-center text-sm text-slate-500">ผู้ให้บริการที่ผ่านการตรวจสอบ</div>
+              <p className="text-center text-sm text-slate-500">ผู้ให้บริการที่ผ่านการตรวจสอบ</p>
             </div>
             <div>
               <div className="text-[28px] flex justify-center font-bold text-pink-600 mb-2">15,000+</div>
