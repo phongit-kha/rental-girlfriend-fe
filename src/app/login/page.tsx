@@ -47,7 +47,9 @@ export default function Home() {
             >
                 <div className="mb-4 flex justify-center gap-4">
                     <div className="w-full">
-                        <div className="text-left text-[#212B36]">อีเมล*</div>
+                        <label className="text-left text-[#212B36]">
+                            อีเมล *
+                        </label>
                         <div className="relative mt-2 w-full">
                             <div className="pointer-events-none absolute inset-y-0 left-0 ml-3 flex items-center">
                                 <Image
@@ -67,7 +69,7 @@ export default function Home() {
                                 onChange={handleChange}
                                 placeholder="กรุณาใส่อีเมล"
                                 style={{ border: '1px solid #E1E7F4' }}
-                                className="mt-[8px] block !h-8 w-full rounded-md border-gray-300 pl-10 text-[#212B36] placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                                className="mt-[8px] block !h-9 w-full rounded-md border-gray-300 pl-10 text-[#212B36] placeholder:text-[13px] placeholder:text-gray-500/50 focus:outline-2 focus:outline-offset-2 focus:outline-pink-500"
                                 required
                             />
                         </div>
@@ -76,7 +78,7 @@ export default function Home() {
                 <div className="flex justify-center gap-4">
                     <div className="w-full">
                         <div className="mb-2 text-left text-[#212B36]">
-                            รหัสผ่าน*
+                            รหัสผ่าน *
                         </div>
                         <div className="relative mt-2 w-full">
                             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -97,7 +99,7 @@ export default function Home() {
                                 onChange={handleChange}
                                 placeholder="กรุณาใส่รหัสผ่าน"
                                 style={{ border: '1px solid #E1E7F4' }}
-                                className="block !h-8 w-full rounded-md border-gray-300 pl-10 text-[#212B36] placeholder:text-gray-400 focus:border-pink-500 focus:ring-pink-500"
+                                className="block !h-9 w-full rounded-md border-gray-300 pl-10 text-[#212B36] placeholder:text-[13px] placeholder:text-gray-500/50 focus:outline-2 focus:outline-offset-2 focus:outline-pink-500"
                                 required
                             />
                         </div>
