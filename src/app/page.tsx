@@ -27,13 +27,13 @@ export default function HomePage() {
           <div className="flex items-center gap-3">
             <button className="h-11 px-4 rounded-md text-sm text-white font-semibold bg-gradient-to-r from-pink-600 to-rose-500 shadow"
             onClick = {(e) => {router.push('/service')}}>
-              <div className="flex flex-row justify-center items-center gap-2">
+              <div className="flex flex-row justify-center items-center gap-2 cursor-pointer transition-all duration-300 hover:scale-105">
                 <Search size={16} />
                 <span>เริ่มค้นหาเลย</span>
               </div>
             </button>
             <button className="h-11 px-4 rounded-md text-sm font-semibold text-pink-600 border border-pink-600 bg-white">
-              <div className="flex flex-row justify-center items-center gap-2">
+              <div className="flex flex-row justify-center items-center gap-2 cursor-pointer transition-all duration-300 hover:scale-105">
                 <Heart size={16} />
                 <span>สมัครเป็นผู้ให้บริการ</span>
               </div>
