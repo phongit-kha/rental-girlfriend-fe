@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Search, SlidersHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
+import PrimaryButton from "./ฺPrimaryButton";
 
 export default function SearchBox({
   placeholder = "ค้นหาชื่อ, ความสนใจ, หรือประเภทบริการ...",
@@ -48,12 +49,7 @@ export default function SearchBox({
           >
             <SlidersHorizontal className={'h-4 w-4'} />
           </button>
-          <button
-            type="submit"
-            className="rounded-md px-4 py-2 mr-1 text-sm font-semibold text-white bg-gradient-to-r from-pink-600 to-rose-500"
-          >
-            ค้นหา
-          </button>
+          <PrimaryButton title="ค้นหา" />
         </div>
       </div>
 
@@ -68,25 +64,40 @@ export default function SearchBox({
             <div>
                 <div className="mb-2 text-sm font-medium text-gray-700">กิจกรรมที่สนใจ</div>
                 <select
-                value={activity}
-                onChange={(e) => setActivity(e.target.value)}
-                className={`h-10 w-180 rounded-md border border-gray-300/40 bg-white pl-3 pr-3 text-sm ${
-                    activity ? "text-gray-700" : "text-[#BFC7D8]"}`}
-                >
-                <option value="">เลือกกิจกรรมที่สนใจ</option>
+                    value={activity}
+                    onChange={(e) => setActivity(e.target.value)}
+                    className={`h-10 w-140 rounded-md border border-gray-300/40 bg-white pl-3 pr-3 text-sm ${
+                        activity ? "text-gray-700" : "text-[#BFC7D8]"}`}
+                    >
+                    <option value="" disabled hidden>เลือกกิจกรรมที่สนใจ</option>
+                    <option value="เดท/คู่เดท">เดท/คู่เดท</option>
+                    <option value="ดูหนัง">ดูหนัง</option>
+                    <option value="เพื่อนร่วมกิจกรรม">เพื่อนร่วมกิจกรรม</option>
+                    <option value="ช้อปปิ้ง">ช้อปปิ้ง</option>
+                    <option value="ทานอาหาร">ทานอาหาร</option>
+                    <option value="เดินเล่น">เดินเล่น</option>
+                    <option value="งานสังคม">งานสังคม</option>
+                    <option value="ถ่ายรูป">ถ่ายรูป</option>
+                    <option value="ท่องเที่ยว">ท่องเที่ยว</option>
+                    <option value="คอนเสิร์ต">คอนเสิร์ต</option>
+                    <option value="กีฬา">กีฬา</option>
+                    <option value="อื่น ๆ">อื่น ๆ</option>
                 </select>
             </div>
 
             {/* เพศ */}
             <div>
-            <div className="mb-2 text-sm font-medium text-gray-700 ml-8.75">เพศ</div>
+            <div className="mb-2 text-sm font-medium text-gray-700 ml-7">เพศ</div>
                 <select
                 value={gender}
                 onChange={(e) => setGender(e.target.value)}
-                className={`h-10 w-25 rounded-md border border-gray-300/40 bg-white px-3 text-sm ml-8 mr-8 ${
+                className={`h-10 w-25 rounded-md border border-gray-300/40 bg-white px-3 text-sm ml-5 mr-5 ${
                     gender ? "text-gray-700" : "text-[#BFC7D8]"}`}
                 >
-                <option value="">เลือกเพศ</option>
+                <option value="" disabled hidden>เลือกเพศ</option>
+                <option value="ชาย">ชาย</option>
+                <option value="หญิง">หญิง</option>
+                <option value="ไม่ระบุ">ไม่ระบุ</option>
                 </select>
             </div>
 
@@ -96,12 +107,12 @@ export default function SearchBox({
             <div className="flex items-center gap-2">
                 <input
                 placeholder="ขั้นต่ำ"
-                className="text-center h-10 w-30 rounded-md border border-gray-300/40 bg-white px-3 text-sm placeholder:text-[#BFC7D8]" // เอา text-center ออก + เปลี่ยนสี placeholder
+                className="text-center h-10 w-25.5 rounded-md border border-gray-300/40 bg-white px-3 text-sm placeholder:text-[#BFC7D8]"
                 />
                 <span className="text-gray-400">-</span>
                 <input
                 placeholder="สูงสุด"
-                className="text-center h-10 w-30 rounded-md border border-gray-300/40 bg-white px-3 text-sm placeholder:text-[#BFC7D8]" // เอา text-center ออก + เปลี่ยนสี placeholder
+                className="text-center h-10 w-25.5 rounded-md border border-gray-300/40 bg-white px-3 text-sm placeholder:text-[#BFC7D8]"
                 />
             </div>
             </div>
@@ -109,8 +120,13 @@ export default function SearchBox({
             {/* คะแนนขั้นต่ำ */}
             <div>
             <div className="mb-2 text-sm font-medium text-gray-700 ml-7.5">คะแนนขั้นต่ำ</div>
-            <select className="h-10 w-40 rounded-md border border-gray-300/40 bg-white px-3 text-sm text-[#BFC7D8] ml-7">
-                <option>เลือกคะแนนขั้นต่ำ</option>
+            <select className="h-10 w-40 rounded-md border border-gray-300/40 bg-white px-3 text-sm placeholder:text-[#BFC7D8] ml-5">
+                <option disabled hidden>เลือกคะแนนขั้นต่ำ</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
             </select>
             </div>
         </div>
@@ -118,16 +134,11 @@ export default function SearchBox({
         <div className="mt-3 flex items-center justify-end gap-3">
             <button
             type="button"
-            className="h-10 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-600"
+            className="h-10 rounded-md border border-gray-200 bg-white px-3 text-sm text-gray-600 cursor-pointer transition-all duration-300 hover:scale-105"
             >
             ล้างตัวกรอง
             </button>
-            <button
-            type="button"
-            className="rounded-md px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-pink-600 to-rose-500"
-            >
-            ใช้ตัวกรอง
-            </button>
+            <PrimaryButton title="ใช้ตัวกรอง" />
         </div>
         </div>
     </form>

@@ -2,6 +2,7 @@ import Image from "next/image";
 import { MapPin, Star } from "lucide-react";
 import { Kanit } from 'next/font/google';
 import ActivityBox from "./ActivityBox";
+import PrimaryButton from "./ฺPrimaryButton";
 
 const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] });
 
@@ -36,7 +37,7 @@ export default function Card({
   const priceD = PriceD.toLocaleString("th-TH");
 
   return (
-    <div className={`${kanit.className} w-full h-121 overflow-hidden rounded-[12px] bg-white border border-gray-100 m-4 shadow-md`}>
+    <div className={`${kanit.className} w-full h-121 overflow-hidden rounded-[12px] bg-white border border-gray-100 m-4 shadow-sm`}>
       <div className="relative w-full h-60">
         <Image
           src={imgSrc}
@@ -86,9 +87,7 @@ export default function Card({
             </div>
             <div className="text-[11px] font-normal text-gray-500">฿ {priceD} / วัน</div>
           </div>
-          <button className="rounded-md bg-gradient-to-r from-pink-600 to-rose-500 px-5 py-2 text-[13px] font-bold text-white shadow">
-            ดูโปรไฟล์
-          </button>
+          <PrimaryButton title="ดูโปรไฟล์" />
         </div>
 
         <hr className="border-0 border-t border-t-[#E1E7F4]/60" />

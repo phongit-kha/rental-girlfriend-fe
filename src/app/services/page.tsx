@@ -7,8 +7,9 @@ const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] });
 
 export default function ServicePage() {
   return (
-    <main className={`${kanit.className} min-h-screen mt-24 bg-{#F4F6F8} max-h-[1498px] ml-[64px] mr-[64px]`}>
-        <div className="w-full">
+    <main className={`${kanit.className} mt-16 bg-[#F4F6F8]`}>
+        <div className="mx-auto w-full md:max-w-290"> 
+        <div className="w-full pt-8">
             {/* หัวข้อใหญ่ */}
             <h1 className="text-[33px] font-normal text-black">ค้นหาแฟนเช่า</h1>
             <p className="text-[#6B7280] font-normal text-[13px]">
@@ -76,7 +77,7 @@ export default function ServicePage() {
                     imgSrc="/img/provider3.png"
                 />
             </div>
-            <div className="flex justify-between content-center mb-5">
+            <div className="flex justify-between content-center pb-5">
                 <Card
                     Name="สมหญิง ว้อนชาย"
                     Age={25}
@@ -117,6 +118,7 @@ export default function ServicePage() {
                     imgSrc="/img/provider6.png"
                 />
             </div>
+        </div>
         </div>
     </main>
   )
