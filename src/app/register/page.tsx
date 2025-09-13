@@ -24,7 +24,7 @@ export default function Register() {
                         height={44}
                     />
 
-                    <h1 className="mt-4 text-[28px] font-bold tracking-tight text-[#212B36] sm:text-4xl">
+                    <h1 className="mt-4 text-[28px] font-bold tracking-tight text-[#212B36]">
                         สมัครสมาชิก
                     </h1>
                     <p className="mt-2 text-[16px] text-[#6b7280]">
