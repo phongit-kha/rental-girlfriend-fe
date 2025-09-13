@@ -33,7 +33,7 @@ export default function HomePage() {
                         <button
                             className="h-11 rounded-md bg-gradient-to-r from-pink-600 to-rose-500 px-4 text-sm font-semibold text-white shadow"
                             onClick={(e) => {
-                                router.push('/service')
+                                router.push('/services')
                             }}
                         >
                             <div className="flex cursor-pointer flex-row items-center justify-center gap-2 transition-all duration-300 hover:scale-105">
