@@ -11,9 +11,9 @@ export default function PersonalDetails({
             <div className="flex justify-center gap-4">
                 <div className="w-full">
                     <label className="mb-2 text-left text-[#020617]">
-                        ชื่อ*
+                        ชื่อ *
                     </label>
-                    <div className="relative w-full">
+                    <div className="relative mt-2 w-full">
                         <input
                             type="text"
                             id="firstName"
@@ -29,9 +29,9 @@ export default function PersonalDetails({
                 </div>
                 <div className="w-full">
                     <label className="mb-2 text-left text-[#020617]">
-                        นามสกุล*
+                        นามสกุล *
                     </label>
-                    <div className="relative w-full">
+                    <div className="relative mt-2 w-full">
                         <input
                             type="text"
                             id="lastName"
@@ -46,7 +46,7 @@ export default function PersonalDetails({
                 </div>
                 <div className="w-full">
                     <label className="mb-2 text-left text-[#020617]">
-                        วันเกิด*
+                        วันเกิด *
                     </label>
 
                     <input
@@ -57,7 +57,7 @@ export default function PersonalDetails({
                         onChange={handleChange}
                         style={{ border: '1px solid #E1E7F4' }}
                         placeholder="กรุณาใส่วันเกิด"
-                        className="block !h-9 w-full rounded-md pl-4 text-black placeholder:text-[13px] placeholder:text-[#b4b8bf] focus:outline-2 focus:outline-offset-2 focus:outline-pink-500"
+                        className="mt-2 block !h-9 w-full rounded-md pl-4 text-black placeholder:text-[13px] placeholder:text-[#b4b8bf] focus:outline-2 focus:outline-offset-2 focus:outline-pink-500"
                     />
                 </div>
             </div>

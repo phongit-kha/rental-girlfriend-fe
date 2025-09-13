@@ -48,7 +48,7 @@ export default function Home() {
                 <div className="mb-4 flex justify-center gap-4">
                     <div className="w-full">
                         <div className="text-left text-[#212B36]">อีเมล*</div>
-                        <div className="relative w-full">
+                        <div className="relative mt-2 w-full">
                             <div className="pointer-events-none absolute inset-y-0 left-0 ml-3 flex items-center">
                                 <Image
                                     src="/img/email.svg"
@@ -78,7 +78,7 @@ export default function Home() {
                         <div className="mb-2 text-left text-[#212B36]">
                             รหัสผ่าน*
                         </div>
-                        <div className="relative w-full">
+                        <div className="relative mt-2 w-full">
                             <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                                 <Image
                                     src="/img/lock.svg"
@@ -103,7 +103,7 @@ export default function Home() {
                         </div>
                     </div>
                 </div>
-                <div className="!mt-2 text-right text-[#F24472]">
+                <div className="!mt-2 text-right font-light text-[#F24472]">
                     <Link href="#">ลืมรหัสผ่าน ? </Link>
                 </div>
                 <button
@@ -113,7 +113,7 @@ export default function Home() {
                             'linear-gradient(133.15deg, #F24BA7 2.02%, #EF4444 98.99%)',
                         borderRadius: '6px',
                     }}
-                    className="mt-6 mb-6 w-full cursor-pointer px-5 py-3 text-base font-semibold text-white shadow-sm transition-colors duration-300 hover:scale-105 hover:bg-pink-600 focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 focus:outline-none"
+                    className="mt-6 mb-6 w-full cursor-pointer px-5 py-3 text-base font-semibold text-white shadow-sm transition-all duration-300 hover:scale-105 hover:bg-pink-600 focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 focus:outline-none"
                 >
                     เข้าสู่ระบบ
                 </button>
@@ -122,7 +122,7 @@ export default function Home() {
                 <span className="text-[#000000]">ยังไม่มีบัญชี? </span>
                 <Link
                     href="/register"
-                    className="font-semibold text-[#f24472] transition-colors hover:text-pink-700 hover:underline"
+                    className="text-[#f24472] transition-all hover:text-pink-700 hover:underline"
                 >
                     สมัครสมาชิก
                 </Link>

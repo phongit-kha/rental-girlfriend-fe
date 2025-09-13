@@ -16,9 +16,9 @@ export default function ContactAndPreference({
             <div className="flex justify-center gap-4">
                 <div className="w-full">
                     <label className="mb-2 text-left text-[#020617]">
-                        เบอร์โทรศัพท์*
+                        เบอร์โทรศัพท์ *
                     </label>
-                    <div className="relative w-full">
+                    <div className="relative mt-2 w-full">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                             <Image
                                 src="/img/tel.svg"
@@ -46,7 +46,7 @@ export default function ContactAndPreference({
                     <label className="mb-2 text-left text-[#020617]">
                         เพศ *
                     </label>
-                    <div className="relative w-full">
+                    <div className="relative mt-2 w-full">
                         <select
                             id="gender"
                             name="gender"
@@ -73,7 +73,7 @@ export default function ContactAndPreference({
                     <label className="mb-2 text-left text-[#020617]">
                         เพศที่สนใจ *
                     </label>
-                    <div className="relative w-full">
+                    <div className="relative mt-2 w-full">
                         <select
                             id="interestedGender"
                             name="interestedGender"

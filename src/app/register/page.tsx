@@ -36,7 +36,7 @@ export default function Register() {
                 <div className="mt-6 mb-3 grid w-[631px] grid-cols-2 gap-4 rounded-md bg-[#f4f6f8] p-[5px]">
                     <button
                         onClick={() => setActiveTab('user')}
-                        className={`flex items-center justify-center gap-2 rounded-sm text-center font-medium transition-colors ${
+                        className={`flex items-center justify-center gap-2 rounded-sm text-center font-medium transition-all ${
                             activeTab === 'user'
                                 ? 'bg-white shadow-sm'
                                 : 'hover:text-pink-600'
@@ -64,7 +64,7 @@ export default function Register() {
                     </button>
                     <button
                         onClick={() => setActiveTab('provider')}
-                        className={`flex items-center justify-center gap-2 rounded-sm py-2.5 text-center text-sm font-medium transition-colors ${
+                        className={`flex items-center justify-center gap-2 rounded-sm py-2.5 text-center text-sm font-medium transition-all ${
                             activeTab === 'provider'
                                 ? 'bg-white shadow-sm'
                                 : 'hover:text-pink-600'
@@ -96,7 +96,7 @@ export default function Register() {
                     <span className="text-[#000000]">มีบัญชีอยู่แล้ว? </span>
                     <Link
                         href="/"
-                        className="font-semibold text-[#f24472] transition-colors hover:text-pink-700 hover:underline"
+                        className="text-[#f24472] transition-all hover:text-pink-700 hover:underline"
                     >
                         เข้าสู่ระบบ
                     </Link>

@@ -47,7 +47,7 @@ export default function FormActions({
                         'linear-gradient(133.15deg, #F24BA7 2.02%, #EF4444 98.99%)',
                     borderRadius: '6px',
                 }}
-                className="mt-6 w-full cursor-pointer px-5 py-3 text-base font-semibold text-white transition-colors duration-300 hover:scale-105 hover:bg-pink-600 focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 focus:outline-none"
+                className="mt-6 w-full cursor-pointer px-5 py-3 text-base font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-pink-600 focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 focus:outline-none"
             >
                 สมัครสมาชิก
             </button>

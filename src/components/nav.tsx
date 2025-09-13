@@ -21,19 +21,19 @@ export default function Nav() {
             <div className="flex items-center gap-8 pl-[125px]">
                 <Link
                     href="/services"
-                    className="text-[16px] text-[#212B36] transition-colors hover:text-pink-500"
+                    className="text-[16px] text-[#212B36] transition-all hover:text-pink-500"
                 >
                     ค้นหาบริการ
                 </Link>
                 <Link
                     href="/how-to-use"
-                    className="text-[16px] text-[#212B36] transition-colors hover:text-pink-500"
+                    className="text-[16px] text-[#212B36] transition-all hover:text-pink-500"
                 >
                     วิธีใช้งาน
                 </Link>
                 <Link
                     href="/security"
-                    className="text-[16px] text-[#212B36] transition-colors hover:text-pink-500"
+                    className="text-[16px] text-[#212B36] transition-all hover:text-pink-500"
                 >
                     ความปลอดภัย
                 </Link>
@@ -42,7 +42,7 @@ export default function Nav() {
             <div className="flex items-center gap-4">
                 <Link
                     href="/login"
-                    className="text-[#212B36] transition-colors hover:text-pink-500"
+                    className="text-[#212B36] transition-all hover:text-pink-500"
                 >
                     เข้าสู่ระบบ
                 </Link>
@@ -53,7 +53,7 @@ export default function Nav() {
                             'linear-gradient(133.15deg, #F24BA7 2.02%, #EF4444 98.99%)',
                         borderRadius: '6px',
                     }}
-                    className="cursor-pointer px-5 py-2 font-semibold text-white transition-colors duration-300 hover:scale-105 hover:bg-pink-600"
+                    className="cursor-pointer px-5 py-2 font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-pink-600"
                 >
                     สมัครสมาชิก
                 </Link>

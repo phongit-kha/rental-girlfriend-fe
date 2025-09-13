@@ -11,9 +11,9 @@ export default function PersonalID({
         <div>
             <div className="w-full">
                 <label className="mb-2 text-left text-[#020617]">
-                    รหัสบัตรประจำตัวประชาชน*
+                    รหัสบัตรประจำตัวประชาชน *
                 </label>
-                <div className="relative w-full">
+                <div className="relative mt-2 w-full">
                     <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                         <Image
                             src="/img/userinput.svg"

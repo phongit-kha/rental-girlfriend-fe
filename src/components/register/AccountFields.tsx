@@ -13,9 +13,9 @@ export default function AccountFields({
             <div className="mb-4 flex justify-center gap-4">
                 <div className="w-full">
                     <label className="mb-2 text-left text-[#020617]">
-                        อีเมล*
+                        อีเมล *
                     </label>
-                    <div className="relative w-full">
+                    <div className="relative mt-2 w-full">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                             <Image
                                 src="/img/email.svg"
@@ -41,9 +41,9 @@ export default function AccountFields({
                 </div>
                 <div className="w-full">
                     <label className="mb-2 text-left text-[#020617]">
-                        ชื่อผู้ใช้ (Username)*
+                        ชื่อผู้ใช้ (Username) *
                     </label>
-                    <div className="relative w-full">
+                    <div className="relative mt-2 w-full">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                             <Image
                                 src="/img/userinput.svg"
@@ -71,9 +71,9 @@ export default function AccountFields({
             <div className="flex justify-center gap-4">
                 <div className="w-full">
                     <label className="mb-2 text-left text-[#020617]">
-                        รหัสผ่าน*
+                        รหัสผ่าน *
                     </label>
-                    <div className="relative w-full">
+                    <div className="relative mt-2 w-full">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                             <Image
                                 src="/img/lock.svg"
@@ -99,9 +99,9 @@ export default function AccountFields({
                 </div>
                 <div className="w-full">
                     <label className="mb-2 text-left text-[#020617]">
-                        ยืนยันรหัสผ่าน*
+                        ยืนยันรหัสผ่าน *
                     </label>
-                    <div className="relative w-full">
+                    <div className="relative mt-2 w-full">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                             <Image
                                 src="/img/lock.svg"
