@@ -36,13 +36,13 @@ export default function HomePage() {
                                 router.push('/service')
                             }}
                         >
-                            <div className="flex flex-row items-center justify-center gap-2">
+                            <div className="flex cursor-pointer flex-row items-center justify-center gap-2 transition-all duration-300 hover:scale-105">
                                 <Search size={16} />
                                 <span>เริ่มค้นหาเลย</span>
                             </div>
                         </button>
                         <button className="h-11 rounded-md border border-pink-600 bg-white px-4 text-sm font-semibold text-pink-600">
-                            <div className="flex flex-row items-center justify-center gap-2">
+                            <div className="flex cursor-pointer flex-row items-center justify-center gap-2 transition-all duration-300 hover:scale-105">
                                 <Heart size={16} />
                                 <span>สมัครเป็นผู้ให้บริการ</span>
                             </div>
