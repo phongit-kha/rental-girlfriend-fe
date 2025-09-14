@@ -45,7 +45,8 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
     desc.trim() !== "" &&
     priceHour.trim() !== "" &&
     priceDay.trim() !== "" &&
-    files.length > 0;
+    files.length > 0 &&
+    cats.length > 0;
 
   const removeFile = (idx: number) =>
     setFiles((p) => p.filter((_, i) => i !== idx));
@@ -95,7 +96,7 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
               {files.map((f, i) => (
                 <div
                   key={i}
-                  className="relative h-24 overflow-hidden rounded-lg border"
+                  className="relative h-35 overflow-hidden rounded-lg"
                 >
                   {/* ใช้ <img> เพื่อพรีวิว blob ได้ทันที */}
                   <img
@@ -106,28 +107,29 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
                   <button
                     type="button"
                     onClick={() => removeFile(i)}
-                    className="absolute right-1 top-1 rounded-full bg-white/90 p-1 hover:bg-white"
+                    className="absolute right-1 top-1 rounded-full cursor-pointer p-1 hover:bg-white"
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
               ))}
-
-              <label className="flex h-24 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-400 text-center text-xs text-gray-500 hover:bg-gray-50">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/png,image/jpeg"
-                  className="hidden"
-                  onChange={(e) => addFiles(e.target.files)}
-                />
-                <div className="flex flex-col items-center">
-                  <Upload className="h-5 w-5" />
-                  <span className="mt-1">
-                    คลิกเพื่ออัปโหลด<br />JPG, PNG สูงสุด 5MB
-                  </span>
-                </div>
-              </label>
+              {files.length < 3 && (
+                <label className="col-span-3 flex h-36 cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-400 text-center text-xs text-gray-500 hover:bg-gray-50">
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/png,image/jpeg"
+                    className="hidden"
+                    onChange={(e) => addFiles(e.target.files)}
+                  />
+                  <div className="flex flex-col items-center">
+                    <Upload className="h-5 w-5" />
+                    <span className="mt-1">
+                      คลิกเพื่ออัปโหลด<br />JPG, PNG สูงสุด 5MB
+                    </span>
+                  </div>
+                </label>
+              )}
             </div>
 
             {/* Fields */}
@@ -162,7 +164,7 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
 
             <div className="mt-4">
               <label className="block text-[13px] font-normal text-black">
-                ประเภทบริการ (เลือกได้หลายประเภท)
+                ประเภทบริการ* (เลือกได้หลายประเภท)
               </label>
               <div className="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
                 {CATEGORIES.map((c) => (
@@ -170,9 +172,9 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
                     type="button"
                     key={c}
                     onClick={() => toggleCat(c)}
-                    className={`rounded-md border px-3 py-1.5 text-[11px] bg-gray-100 border-gray-100 ${
+                    className={`rounded-md cursor-pointer px-3 py-1.5 text-[11px] bg-gray-100 border-gray-100 ${
                       cats.includes(c)
-                        ? "bg-gradient-to-r from-pink-600 to-rose-500 text-white"
+                        ? "bg-pink-500 text-white"
                         : "border-gray-300 text-black hover:bg-gray-200"
                     }`}
                   >
@@ -188,11 +190,11 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
                   ราคาต่อชั่วโมง (บาท) *
                 </label>
                 <div className="relative mt-1">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-300">
                     ฿
                   </span>
                   <input
-                    className={`mt-1 w-full rounded-md border px-3 py-2 text-[13px] outline-none
+                    className={`w-full rounded-md border px-3 py-2 text-[13px] outline-none
                       placeholder:text-gray-300 focus:ring-1 focus:gray-300 pl-7 pr-3 py-2
                       ${priceHour ? "text-gray-900 border-gray-300" : "text-gray-400 border-gray-200"}`}
                     placeholder="กรุณาใส่ราคา"
@@ -206,11 +208,11 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
                   ราคาต่อวัน (บาท) *
                 </label>
                 <div className="relative mt-1">
-                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                  <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-300">
                     ฿
                   </span>
                   <input
-                    className={`mt-1 w-full rounded-md border px-3 py-2 text-[13px] outline-none
+                    className={`w-full rounded-md border px-3 py-2 text-[13px] outline-none
                       placeholder:text-gray-300 focus:ring-1 focus:gray-300 pl-7 pr-3 py-2
                       ${priceDay ? "text-gray-900 border-gray-300" : "text-gray-400 border-gray-200"}`}
                     placeholder="กรุณาใส่ราคา"
@@ -227,14 +229,14 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-md border px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                className="rounded-md border px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer border-[#E2E8F0]"
               >
                 ยกเลิก
               </button>
               <button
                 disabled={!isComplete} 
                 type="submit"
-                className="inline-flex items-center gap-2 rounded-md bg-rose-500 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-pink-600 to-rose-500 cursor-pointer transition-all duration-300 hover:scale-105"
+                className="inline-flex items-center gap-2 rounded-md bg-rose-500 px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-pink-600 to-rose-500 cursor-pointer transition-all duration-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
               >
                 <Save className="h-4 w-4" />
                 บันทึก

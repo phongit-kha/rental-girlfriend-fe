@@ -8,7 +8,7 @@ const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] });
 
 export default function serviceMangePage2() {
   return (
-    <main className={`${kanit.className} min-h-screen bg-[#F4F6F8] py-8 mt-16`}>
+    <main className={`${kanit.className} min-h-screen bg-[#F4F6F8] py-8`}>
       <div className="mx-auto max-w-7xl px-6">
         {/* Header */}
         <div className="flex items-start justify-between">

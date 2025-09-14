@@ -7,7 +7,7 @@ const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] })
 
 export default function ServicePage() {
     return (
-        <main className={`${kanit.className} mt-16 bg-[#F4F6F8]`}>
+        <main className={`${kanit.className} bg-[#F4F6F8]`}>
             <div className="mx-auto w-full md:max-w-290">
                 <div className="w-full pt-8">
                     {/* หัวข้อใหญ่ */}
