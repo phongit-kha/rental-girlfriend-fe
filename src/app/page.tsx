@@ -29,25 +29,21 @@ export default function HomePage() {
                         </p>
                     </header>
 
-                    <div className="flex items-center gap-3">
-                        <button
-                            className="h-11 rounded-md bg-gradient-to-r from-pink-600 to-rose-500 px-4 text-sm font-semibold text-white shadow"
-                            onClick={(e) => {
-                                router.push('/services')
-                            }}
-                        >
-                            <div className="flex cursor-pointer flex-row items-center justify-center gap-2 transition-all duration-300 hover:scale-105">
-                                <Search size={16} />
-                                <span>เริ่มค้นหาเลย</span>
-                            </div>
-                        </button>
-                        <button className="h-11 rounded-md border border-pink-600 bg-white px-4 text-sm font-semibold text-pink-600">
-                            <div className="flex cursor-pointer flex-row items-center justify-center gap-2 transition-all duration-300 hover:scale-105">
-                                <Heart size={16} />
-                                <span>สมัครเป็นผู้ให้บริการ</span>
-                            </div>
-                        </button>
-                    </div>
+          <div className="flex items-center gap-3">
+            <button className="h-11 px-4 rounded-md text-sm text-white font-semibold bg-gradient-to-r from-pink-600 to-rose-500 shadow"
+            onClick = {(e) => {router.push('/services')}}>
+              <div className="flex flex-row justify-center items-center gap-2 cursor-pointer transition-all duration-300 hover:scale-105">
+                <Search size={16} />
+                <span>เริ่มค้นหาเลย</span>
+              </div>
+            </button>
+            <button className="h-11 px-4 rounded-md text-sm font-semibold text-pink-600 border border-pink-600 bg-white">
+              <div className="flex flex-row justify-center items-center gap-2 cursor-pointer transition-all duration-300 hover:scale-105">
+                <Heart size={16} />
+                <span>สมัครเป็นผู้ให้บริการ</span>
+              </div>
+            </button>
+          </div>
 
                     <div className="grid grid-cols-3 gap-6">
                         <div>

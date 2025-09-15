@@ -7,31 +7,33 @@ import PrimaryButton from './ฺPrimaryButton'
 const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] })
 
 type Props = {
-    Name: string
-    Age: number
-    Rating: number
-    Location: string
-    Description: string
-    Type: string
-    PriceHr: number
-    PriceD: number
-    Review: string
-    ReviewCount: number
-    imgSrc: string
-}
+  Name: string;
+  Age: number;
+  Rating: number;
+  Location: string;
+  Description: string;
+  Type: string;
+  PriceHr: number;
+  PriceD: number;
+  Review: string;
+  ReviewCount: number;
+  imgSrc: string;
+  buttonTitle: string;
+};
 
 export default function Card({
-    Name,
-    Age,
-    Rating,
-    Location,
-    Description,
-    Type,
-    PriceHr,
-    PriceD,
-    Review,
-    ReviewCount,
-    imgSrc,
+  Name,
+  Age,
+  Rating,
+  Location,
+  Description,
+  Type,
+  PriceHr,
+  PriceD,
+  Review,
+  ReviewCount,
+  imgSrc,
+  buttonTitle
 }: Props) {
     const priceHr = PriceHr.toLocaleString('th-TH')
     const priceD = PriceD.toLocaleString('th-TH')
@@ -89,21 +91,16 @@ export default function Card({
                     title3="เดินเล่น"
                 />
 
-                {/* ราคา + ปุ่มโปรไฟล์ */}
-                <div className="mt-3 mb-3 flex items-center justify-between">
-                    <div className="flex flex-col">
-                        <div className="text-[16px] font-normal">
-                            ฿ {priceHr}{' '}
-                            <span className="ftext-[16px] font-normal">
-                                / ชั่วโมง
-                            </span>
-                        </div>
-                        <div className="text-[11px] font-normal text-gray-500">
-                            ฿ {priceD} / วัน
-                        </div>
-                    </div>
-                    <PrimaryButton title="ดูโปรไฟล์" />
-                </div>
+        {/* ราคา + ปุ่มโปรไฟล์ */}
+        <div className="mt-3 mb-3 flex items-center justify-between">
+          <div className="flex flex-col">
+            <div className="text-[16px] font-normal">
+              ฿ {priceHr} <span className="ftext-[16px] font-normal">/ ชั่วโมง</span>
+            </div>
+            <div className="text-[11px] font-normal text-gray-500">฿ {priceD} / วัน</div>
+          </div>
+          <PrimaryButton title={buttonTitle} />
+        </div>
 
                 <hr className="border-0 border-t border-t-[#E1E7F4]/60" />
 
