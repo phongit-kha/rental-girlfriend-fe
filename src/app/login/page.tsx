@@ -1,7 +1,7 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuthContext } from '@/contexts/AuthContext'
 
@@ -11,8 +11,20 @@ export default function Home() {
         password: '',
     })
     const [isLoading, setIsLoading] = useState(false)
-    const { login } = useAuthContext()
+    const { login, isAuthenticated, user } = useAuthContext()
     const router = useRouter()
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            console.log('🔄 [Login] User already authenticated, redirecting...')
+            if (user.type === 'provider') {
+                router.push('/servicemanage')
+            } else {
+                router.push('/')
+            }
+        }
+    }, [isAuthenticated, user, router])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target
@@ -29,11 +41,21 @@ export default function Home() {
         }
 
         setIsLoading(true)
-        const success = await login(formData.email, formData.password)
+        const result = await login(formData.email, formData.password)
         setIsLoading(false)
 
-        if (success) {
-            router.push('/')
+        if (result.success && result.user) {
+            console.log(
+                '✅ [Login] Login successful, user type:',
+                result.user.type
+            )
+
+            // Redirect based on user type
+            if (result.user.type === 'provider') {
+                router.push('/servicemanage')
+            } else {
+                router.push('/')
+            }
         }
     }
 

@@ -120,7 +120,7 @@ export default function ProviderForm() {
             const success = await register(userData)
 
             if (success) {
-                router.push('/profile') // redirect to profile for providers
+                router.push('/servicemanage') // redirect to service management for providers
             }
         } catch {
             toast.error('เกิดข้อผิดพลาดในการสมัครสมาชิก')

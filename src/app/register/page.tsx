@@ -3,10 +3,29 @@ import Image from 'next/image'
 import Link from 'next/link'
 import UserForm from '@/components/register/userform'
 import ProviderForm from '@/components/register/providerform'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuthContext } from '@/contexts/AuthContext'
 
 export default function Register() {
     const [activeTab, setActiveTab] = useState('user')
+    const { isAuthenticated, user } = useAuthContext()
+    const router = useRouter()
+
+    // Redirect if already authenticated
+    useEffect(() => {
+        if (isAuthenticated && user) {
+            console.log(
+                '🔄 [Register] User already authenticated, redirecting...'
+            )
+            if (user.type === 'provider') {
+                router.push('/servicemanage')
+            } else {
+                router.push('/')
+            }
+        }
+    }, [isAuthenticated, user, router])
+
     return (
         <main
             style={{

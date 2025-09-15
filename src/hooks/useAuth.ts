@@ -29,20 +29,23 @@ export const useAuth = () => {
         console.log('✅ [useAuth] Auth initialized')
     }, [])
 
-    const login = async (email: string, password: string): Promise<boolean> => {
+    const login = async (
+        email: string,
+        password: string
+    ): Promise<{ success: boolean; user?: User }> => {
         try {
             setLoading(true)
             const loggedInUser = loginUser(email, password)
             setUser(loggedInUser)
             toast.success(`ยินดีต้อนรับ ${loggedInUser.firstName}!`)
-            return true
+            return { success: true, user: loggedInUser }
         } catch (error) {
             toast.error(
                 error instanceof Error
                     ? error.message
                     : 'เกิดข้อผิดพลาดในการเข้าสู่ระบบ'
             )
-            return false
+            return { success: false }
         } finally {
             setLoading(false)
         }
