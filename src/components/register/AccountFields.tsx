@@ -68,7 +68,7 @@ export default function AccountFields({
                     <div className="relative mt-2 w-full">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
                             <Image
-                                src="/img/userinput.svg"
+                                src="/img/userInput.svg"
                                 alt="user icon"
                                 width={20}
                                 height={20}
