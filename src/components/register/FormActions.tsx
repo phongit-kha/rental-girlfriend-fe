@@ -57,7 +57,7 @@ export default function FormActions({
                     </button>{' '}
                     และ{' '}
                     <Link
-                        href="#"
+                        href="/privacy"
                         className="font-medium text-[#f24472] hover:underline"
                     >
                         นโยบายความเป็นส่วนตัว
