@@ -1,7 +1,12 @@
+'use client'
 import Image from 'next/image'
 import Link from 'next/link'
+import Forlogin from './forlogin'
+import Alreadylogin from './alreadylogin'
+import { useState } from 'react'
 
 export default function Nav() {
+    const [loginState, setLoginState] = useState(1)
     return (
         <nav className="sticky top-0 z-50 flex h-[64px] w-full items-center justify-between bg-white pr-[71px] pl-[71px] shadow-xl">
             <div className="flex gap-[422px]">
@@ -38,26 +43,7 @@ export default function Nav() {
                     ความปลอดภัย
                 </Link>
             </div>
-
-            <div className="flex items-center gap-4">
-                <Link
-                    href="/login"
-                    className="text-[#212B36] transition-all hover:text-pink-500"
-                >
-                    เข้าสู่ระบบ
-                </Link>
-                <Link
-                    href="/register"
-                    style={{
-                        background:
-                            'linear-gradient(133.15deg, #F24BA7 2.02%, #EF4444 98.99%)',
-                        borderRadius: '6px',
-                    }}
-                    className="cursor-pointer px-5 py-2 font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-pink-600"
-                >
-                    สมัครสมาชิก
-                </Link>
-            </div>
+            {loginState === 0 ? <Forlogin /> : <Alreadylogin />}
         </nav>
     )
 }

@@ -1,0 +1,58 @@
+'use client'
+import Image from 'next/image'
+import { useState } from 'react'
+
+export default function Alreadylogin() {
+    const [messageCnt, setMessageCnt] = useState(4)
+    const [notifyCnt, setNotifyCnt] = useState(10)
+    const [name, setName] = useState('สมชาย โดว')
+    const [pathimg, setPathImg] = useState('/img/p2.jpg')
+
+    const notifyDisplay = notifyCnt > 9 ? '9+' : notifyCnt
+    const messageCntDisplay = messageCnt > 9 ? '9+' : messageCnt
+
+    return (
+        <div className="flex items-center gap-[16px]">
+            <button className="relative cursor-pointer transition-all duration-300 hover:scale-105">
+                <Image
+                    src="/img/message.svg"
+                    alt="message"
+                    width={28}
+                    height={28}
+                />
+                {messageCnt > 0 && (
+                    <div className="absolute -top-0 -right-1 flex h-[15px] w-[14px] items-center justify-center rounded-[100px] bg-[#ef4444] text-[10px] text-white">
+                        {messageCntDisplay}
+                    </div>
+                )}
+            </button>
+
+            <button className="relative cursor-pointer transition-all duration-300 hover:scale-105">
+                <Image
+                    src="/img/notify.svg"
+                    alt="notice"
+                    width={28}
+                    height={28}
+                />
+                {notifyCnt > 0 && (
+                    <div className="absolute -top-0 -right-1 flex h-[15px] w-[14px] items-center justify-center rounded-[100px] bg-[#ef4444] text-[10px] text-white">
+                        {notifyDisplay}
+                    </div>
+                )}
+            </button>
+
+            <button className="flex cursor-pointer items-center gap-[10px] transition-all duration-300 hover:scale-105">
+                <div className="h-10 w-10">
+                    <Image
+                        src={pathimg}
+                        alt="smallprofile"
+                        width={40}
+                        height={40}
+                        className="rounded-full object-cover"
+                    />
+                </div>
+                <div className="text-[16px] text-[#212b36]">{name}</div>
+            </button>
+        </div>
+    )
+}

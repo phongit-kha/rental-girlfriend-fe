@@ -1,5 +1,5 @@
 import '@/styles/globals.css'
-import Nav from '@/components/nav'
+import Nav from '@/components/nav/nav'
 import { Kanit } from 'next/font/google'
 const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] })
 export default function RootLayout({
