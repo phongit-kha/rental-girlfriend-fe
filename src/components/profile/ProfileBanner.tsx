@@ -1,42 +1,59 @@
-import { Camera } from "lucide-react";
+import { Camera } from 'lucide-react'
 
-export default function ProfileBanner({ user, setChangeProfile, setEditProfile, editProfile }: any) {
+export default function ProfileBanner({
+    user,
+    setChangeProfile,
+    setEditProfile,
+    editProfile,
+}: any) {
     return (
-        <section className="flex justify-between p-7 gap-3 w-[762px] h-[160px] rounded-xl bg-[linear-gradient(133.15deg,#F24BA7_2.02%,#EF4444_98.99%)]">  
-            <div className="w-65.25 h-20 flex items-end gap-3 pt-26">
-                <div className="w-20 h-20 relative">
+        <section className="flex h-[160px] w-[762px] justify-between gap-3 rounded-xl bg-[linear-gradient(133.15deg,#F24BA7_2.02%,#EF4444_98.99%)] p-7">
+            <div className="flex h-20 w-65.25 items-end gap-3 pt-26">
+                <div className="relative h-20 w-20">
                     <img
                         src={user.img}
                         alt="profile"
-                        className="box-border w-20 h-20 rounded-full bg-cover bg-center border-[3px] border-white rounded-full"
+                        className="box-border h-20 w-20 rounded-full border-[3px] border-white bg-cover bg-center"
                     />
-                    <div onClick={() => setChangeProfile(true)} className="absolute bottom-0 right-0 w-7 h-7 flex flex-col justify-center items-center gap-[10px] bg-white rounded-full border border-gray-300">
-                        <Camera className="w-4 h-4"/>
-                    </div>
+                    <button
+                        onClick={() => setChangeProfile(true)}
+                        className="absolute right-0 bottom-0 flex h-7 w-7 cursor-pointer flex-col items-center justify-center gap-[10px] rounded-full border border-gray-300 bg-white"
+                    >
+                        <Camera className="h-4 w-4" />
+                    </button>
                 </div>
-                        
-                <div className="w-[169px] h-[62px] flex flex-col items-start gap-3">
-                    <h1 className="w-[109px] h-[32px] font-bold text-[23px] leading-[140%] text-white">{user.username}</h1>
-                    <p className="w-[169px] h-[18px] font-bold text-[13px] leading-[140%] text-white">ผู้ให้บริการ | เข้าร่วมตั้งแต่ {user.joined}</p>
+
+                <div className="flex h-[62px] w-[169px] flex-col items-start gap-3">
+                    <h1 className="h-[32px] w-[109px] text-[23px] leading-[140%] font-bold text-white">
+                        {user.username}
+                    </h1>
+                    <p className="h-[18px] w-[169px] text-[13px] leading-[140%] font-bold text-white">
+                        ผู้ให้บริการ | เข้าร่วมตั้งแต่ {user.joined}
+                    </p>
                 </div>
             </div>
 
-            <div className="flex justify-end items-start w-[102px] h-[34px]">
+            <div className="flex h-[34px] w-[102px] items-start justify-end">
                 {editProfile ? (
-                    <button onClick={() => setEditProfile(false)} className="flex flex-row justify-center items-center px-4 py-2 gap-[10px] w-[69px] h-[34px] bg-[rgba(244,246,248,0.5)] rounded-md">
-                        <p className="w-[70px] h-[18px] font-bold text-[13px] leading-[140%] text-white">
+                    <button
+                        onClick={() => setEditProfile(false)}
+                        className="flex h-[34px] w-[69px] flex-row items-center justify-center gap-[10px] rounded-md bg-[rgba(244,246,248,0.5)] px-4 py-2"
+                    >
+                        <p className="h-[18px] w-[70px] text-[13px] leading-[140%] font-bold text-white">
                             ยกเลิก
                         </p>
                     </button>
                 ) : (
-                    <button onClick={() => setEditProfile(true)} className="flex flex-row justify-center items-center px-4 py-2 gap-[10px] w-[102px] h-[34px] bg-[rgba(244,246,248,0.5)] rounded-md">
-                        <p className="w-[70px] h-[18px] font-bold text-[13px] leading-[140%] text-white">
+                    <button
+                        onClick={() => setEditProfile(true)}
+                        className="flex h-[34px] w-[102px] cursor-pointer flex-row items-center justify-center gap-[10px] rounded-md bg-[rgba(244,246,248,0.5)] px-4 py-2"
+                    >
+                        <p className="h-[18px] w-[70px] text-[13px] leading-[140%] font-bold text-white">
                             แก้ไขโปรไฟล์
                         </p>
                     </button>
                 )}
-                    
             </div>
         </section>
-    );
+    )
 }
