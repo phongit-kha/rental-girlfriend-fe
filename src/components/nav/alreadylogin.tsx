@@ -13,7 +13,7 @@ export default function Alreadylogin() {
 
     return (
         <div className="flex items-center gap-[16px]">
-            <div className="relative">
+            <button className="relative cursor-pointer transition-all duration-300 hover:scale-105">
                 <Image
                     src="/img/message.svg"
                     alt="message"
@@ -25,9 +25,9 @@ export default function Alreadylogin() {
                         {messageCntDisplay}
                     </div>
                 )}
-            </div>
+            </button>
 
-            <div className="relative">
+            <button className="relative cursor-pointer transition-all duration-300 hover:scale-105">
                 <Image
                     src="/img/notify.svg"
                     alt="notice"
@@ -39,9 +39,9 @@ export default function Alreadylogin() {
                         {notifyDisplay}
                     </div>
                 )}
-            </div>
+            </button>
 
-            <div className="flex items-center gap-[10px]">
+            <button className="flex cursor-pointer items-center gap-[10px] transition-all duration-300 hover:scale-105">
                 <div className="h-10 w-10">
                     <Image
                         src={pathimg}
@@ -52,7 +52,7 @@ export default function Alreadylogin() {
                     />
                 </div>
                 <div className="text-[16px] text-[#212b36]">{name}</div>
-            </div>
+            </button>
         </div>
     )
 }
