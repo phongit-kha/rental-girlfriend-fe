@@ -96,6 +96,7 @@ export default function ProfilePage() {
                     setTempImg={(url) => setTempImg(url)}
                     saveProfile={() => {
                         if (tempImg) {
+                            setDraft({ ...draft, img: tempImg })
                             setUser({ ...user, img: tempImg });
                             setChangeProfile(false);
                             setTempImg(null);
