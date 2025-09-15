@@ -13,7 +13,7 @@ export default function ProfileBanner({
                     <img
                         src={user.img}
                         alt="profile"
-                        className="box-border h-20 w-20 rounded-full border-[3px] border-white bg-cover bg-center"
+                        className="box-border h-20 w-20 rounded-full border-[3px] border-white object-cover"
                     />
                     <button
                         onClick={() => setChangeProfile(true)}
