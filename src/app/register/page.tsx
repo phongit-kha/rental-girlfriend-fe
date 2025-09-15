@@ -91,8 +91,9 @@ export default function Register() {
                         </span>
                     </button>
                 </div>
+
                 {activeTab === 'user' ? <UserForm /> : <ProviderForm />}
-                <div className="pt-3 pb-[64px] text-center">
+                <div className="pt-3 text-center">
                     <span className="text-[#000000]">มีบัญชีอยู่แล้ว? </span>
                     <Link
                         href="/"
@@ -100,6 +101,30 @@ export default function Register() {
                     >
                         เข้าสู่ระบบ
                     </Link>
+                </div>
+
+                {/* Demo Auto Fill Buttons - ไว้ข้างล่างสุด */}
+                <div className="mt-4 flex justify-center gap-3 pb-[64px]">
+                    <button
+                        type="button"
+                        className="cursor-pointer rounded-md bg-pink-500 px-4 py-2 text-sm text-white transition-colors hover:bg-pink-600"
+                        onClick={() => {
+                            if (activeTab === 'user') {
+                                // Trigger auto fill for user
+                                window.dispatchEvent(
+                                    new CustomEvent('fillUserDemo')
+                                )
+                            } else {
+                                // Trigger auto fill for provider
+                                window.dispatchEvent(
+                                    new CustomEvent('fillProviderDemo')
+                                )
+                            }
+                        }}
+                    >
+                        🎯 Auto Fill Demo (
+                        {activeTab === 'user' ? 'ลูกค้า' : 'ผู้ให้บริการ'})
+                    </button>
                 </div>
             </div>
         </main>

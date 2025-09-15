@@ -1,12 +1,14 @@
 import Link from 'next/link'
-type AccountFieldsProps = {
+type FormActionsProps = {
     formData: any
     handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
+    isLoading?: boolean
 }
 export default function FormActions({
     formData,
     handleChange,
-}: AccountFieldsProps) {
+    isLoading = false,
+}: FormActionsProps) {
     return (
         <div>
             <div className="flex items-center">
@@ -42,14 +44,15 @@ export default function FormActions({
 
             <button
                 type="submit"
+                disabled={isLoading || !formData.acception}
                 style={{
                     background:
                         'linear-gradient(133.15deg, #F24BA7 2.02%, #EF4444 98.99%)',
                     borderRadius: '6px',
                 }}
-                className="mt-6 w-full cursor-pointer px-5 py-3 text-base font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-pink-600 focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 focus:outline-none"
+                className="mt-6 w-full cursor-pointer px-5 py-3 text-base font-semibold text-white transition-all duration-300 hover:scale-105 hover:bg-pink-600 focus:ring-2 focus:ring-pink-500 focus:ring-offset-2 focus:outline-none disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
             >
-                สมัครสมาชิก
+                {isLoading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
             </button>
         </div>
     )
