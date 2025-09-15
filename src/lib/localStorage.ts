@@ -151,8 +151,10 @@ export const updateUser = (userId: string, updates: Partial<User>): User => {
         throw new Error('ไม่พบผู้ใช้ที่ต้องการแก้ไข')
     }
 
+    const currentUser = users[userIndex]!
+
     // ตรวจสอบอีเมลซ้ำ (ถ้ามีการอัปเดตอีเมล)
-    if (updates.email && updates.email !== users[userIndex].email) {
+    if (updates.email && updates.email !== currentUser.email) {
         const emailExists = users.find(
             (u) => u.email === updates.email && u.id !== userId
         )
@@ -162,7 +164,7 @@ export const updateUser = (userId: string, updates: Partial<User>): User => {
     }
 
     // ตรวจสอบ username ซ้ำ (ถ้ามีการอัปเดต username)
-    if (updates.username && updates.username !== users[userIndex].username) {
+    if (updates.username && updates.username !== currentUser.username) {
         const usernameExists = users.find(
             (u) => u.username === updates.username && u.id !== userId
         )
@@ -171,14 +173,14 @@ export const updateUser = (userId: string, updates: Partial<User>): User => {
         }
     }
 
-    const updatedUser = { ...users[userIndex], ...updates }
+    const updatedUser = { ...currentUser, ...updates }
     const updatedUsers = [...users]
     updatedUsers[userIndex] = updatedUser
     setUsers(updatedUsers)
 
     // อัปเดต current user ด้วย (ถ้าเป็นผู้ใช้ปัจจุบัน)
-    const currentUser = getCurrentUser()
-    if (currentUser && currentUser.id === userId) {
+    const loggedInUser = getCurrentUser()
+    if (loggedInUser && loggedInUser.id === userId) {
         setCurrentUser(updatedUser)
     }
 
