@@ -3,6 +3,7 @@ import { MapPin, Star } from 'lucide-react'
 import { Kanit } from 'next/font/google'
 import ActivityBox from './ActivityBox'
 import PrimaryButton from './PrimaryButton'
+import { isBase64Image } from '@/lib/imageUtils'
 
 const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] })
 
@@ -45,14 +46,23 @@ export default function Card({
             className={`${kanit.className} m-4 h-121 w-full max-w-90 overflow-hidden rounded-[12px] border border-gray-100 bg-white shadow-sm`}
         >
             <div className="relative h-60 w-full">
-                <Image
-                    src={imgSrc}
-                    alt={Name}
-                    fill
-                    sizes="(max-width: 768px) 100vw, 480px"
-                    className="object-cover object-[50%_35%]"
-                    priority
-                />
+                {isBase64Image(imgSrc) ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img
+                        src={imgSrc}
+                        alt={Name}
+                        className="h-full w-full object-cover object-[50%_35%]"
+                    />
+                ) : (
+                    <Image
+                        src={imgSrc}
+                        alt={Name}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 480px"
+                        className="object-cover object-[50%_35%]"
+                        priority
+                    />
+                )}
                 {Type && (
                     <span className="absolute bottom-4 left-4 rounded-full bg-[#EAB308] px-3 py-1 text-xs font-semibold text-white shadow">
                         {Type}

@@ -176,20 +176,17 @@ export default function ServiceMangePage() {
                     try {
                         if (!user) return
 
-                        // รวมรูปเก่าและรูปใหม่
-                        const existingImagesStr = formData.get(
-                            'existingImages'
-                        ) as string | null
-                        const existingImages: string[] = existingImagesStr
-                            ? (JSON.parse(existingImagesStr) as string[])
+                        // รับรูปภาพที่เป็น base64 แล้ว
+                        const imagesStr = formData.get('images') as
+                            | string
+                            | null
+                        const allImages: string[] = imagesStr
+                            ? (JSON.parse(imagesStr) as string[])
                             : []
-                        const newImages = formData.getAll('images') as File[]
 
-                        // TODO: ในระบบจริงควรอัปโหลดไฟล์ใหม่ไปเซิร์ฟเวอร์ก่อน
-                        // ตอนนี้เราจะใช้ placeholder URLs
-                        const newImageUrls = newImages.map(
-                            () =>
-                                `/img/p${Math.floor(Math.random() * 16) + 1}.jpg`
+                        console.log(
+                            '📸 [ServiceManage] Received images:',
+                            allImages.length
                         )
 
                         const serviceData = {
@@ -205,10 +202,7 @@ export default function ServiceMangePage() {
                             priceDay: parseInt(
                                 formData.get('priceDay') as string
                             ),
-                            images: [
-                                ...existingImages,
-                                ...newImageUrls,
-                            ] as string[], // รวมรูปเก่าและรูปใหม่
+                            images: allImages,
                             active: true,
                         }
 
