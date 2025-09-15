@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import {
-    User,
     getCurrentUser,
     setCurrentUser,
     loginUser,
@@ -10,6 +9,7 @@ import {
     logoutUser,
     initializeSampleData,
 } from '@/lib/localStorage'
+import type { User } from '@/lib/localStorage'
 import toast from 'react-hot-toast'
 
 export const useAuth = () => {

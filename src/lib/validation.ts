@@ -106,7 +106,7 @@ export const validateName = (
 }
 
 // Thai ID Card validation
-export const validateIdCard = (idCard: string): string | null => {
+export const validateIdCard = (_idCard: string): string | null => {
     return null
 }
 
@@ -201,10 +201,26 @@ export const validateAcceptance = (accepted: boolean): string | null => {
     return null
 }
 
+// Define the form data interface
+interface RegistrationFormData {
+    email: string
+    username: string
+    password: string
+    confirmPassword: string
+    firstName: string
+    lastName: string
+    id: string
+    tel: string
+    birthdate: string
+    gender: string
+    interestedGender: string
+    acception: boolean
+}
+
 // Comprehensive form validation
 export const validateRegistrationForm = (
-    formData: any,
-    isProvider: boolean = false
+    formData: RegistrationFormData,
+    isProvider = false
 ): ValidationResult => {
     const errors: ValidationError[] = []
 

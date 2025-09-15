@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { Kanit } from 'next/font/google'
 import Card from '@/components/Card'
-import { ChevronDown, Search } from 'lucide-react'
+import { ChevronDown } from 'lucide-react'
 import SearchBox from '@/components/SearchBox'
 import {
     getServices,
@@ -114,7 +114,7 @@ export default function ServicePage() {
                                         Review={`จองแล้ว ${service.bookingCount} ครั้ง`}
                                         ReviewCount={service.reviewCount}
                                         imgSrc={
-                                            service.images[0] || provider.img
+                                            service.images[0] ?? provider.img
                                         }
                                         buttonTitle="ดูโปรไฟล์"
                                         Categories={service.categories}

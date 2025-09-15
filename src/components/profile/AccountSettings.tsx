@@ -64,7 +64,7 @@ export default function AccountSettings() {
                 open={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={handleDeleteAccount}
-                userType={user?.type || 'customer'}
+                userType={user?.type ?? 'customer'}
             />
         </>
     )

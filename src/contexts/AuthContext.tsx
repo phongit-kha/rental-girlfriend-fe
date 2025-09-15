@@ -1,8 +1,9 @@
 'use client'
 
-import { createContext, useContext, ReactNode } from 'react'
+import { createContext, useContext } from 'react'
+import type { ReactNode } from 'react'
 import { useAuth } from '@/hooks/useAuth'
-import { User } from '@/lib/localStorage'
+import type { User } from '@/lib/localStorage'
 
 interface AuthContextType {
     user: User | null

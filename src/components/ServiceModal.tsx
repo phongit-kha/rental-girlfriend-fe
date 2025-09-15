@@ -1,9 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Upload, Plus, FileText, Save, Trash2 } from 'lucide-react'
+import { X, Upload, FileText, Save, Trash2 } from 'lucide-react'
 import { Kanit } from 'next/font/google'
-import { Service } from '@/lib/localStorage'
+import Image from 'next/image'
+import type { Service } from '@/lib/localStorage'
 
 const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] })
 
@@ -153,9 +154,11 @@ export default function ServiceModal({
                                     key={`existing-${i}`}
                                     className="relative h-35 max-w-53 flex-grow overflow-hidden rounded-lg"
                                 >
-                                    <img
+                                    <Image
                                         src={imgSrc}
                                         alt={`รูปที่ ${i + 1}`}
+                                        width={200}
+                                        height={140}
                                         className="h-full w-full object-cover"
                                     />
                                     <button
@@ -174,7 +177,8 @@ export default function ServiceModal({
                                     key={`new-${i}`}
                                     className="relative h-35 max-w-53 flex-grow overflow-hidden rounded-lg"
                                 >
-                                    {/* ใช้ <img> เพื่อพรีวิว blob ได้ทันที */}
+                                    {/* ใช้ <img> เพื่อพรีวิว blob ได้ทันที - Next.js Image ไม่รองรับ blob URLs */}
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                         src={URL.createObjectURL(f)}
                                         alt={f.name}

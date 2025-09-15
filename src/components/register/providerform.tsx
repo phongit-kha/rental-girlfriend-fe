@@ -119,7 +119,7 @@ export default function ProviderForm() {
             if (success) {
                 router.push('/profile') // redirect to profile for providers
             }
-        } catch (error) {
+        } catch {
             toast.error('เกิดข้อผิดพลาดในการสมัครสมาชิก')
         } finally {
             setIsLoading(false)

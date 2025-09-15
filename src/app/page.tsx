@@ -32,7 +32,7 @@ export default function HomePage() {
                     <div className="flex items-center gap-3">
                         <button
                             className="h-11 rounded-md bg-gradient-to-r from-pink-600 to-rose-500 px-4 text-sm font-semibold text-white shadow"
-                            onClick={(e) => {
+                            onClick={() => {
                                 router.push('/services')
                             }}
                         >
@@ -43,7 +43,7 @@ export default function HomePage() {
                         </button>
                         <button
                             className="h-11 rounded-md border border-pink-600 bg-white px-4 text-sm font-semibold text-pink-600"
-                            onClick={(e) => {
+                            onClick={() => {
                                 router.push('/register')
                             }}
                         >

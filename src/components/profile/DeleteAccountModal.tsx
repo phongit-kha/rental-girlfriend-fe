@@ -30,8 +30,8 @@ export default function DeleteAccountModal({
 
         setIsLoading(true)
         try {
-            await onConfirm(password)
-        } catch (error) {
+            onConfirm(password)
+        } catch {
             // Error handling will be done in parent component
         } finally {
             setIsLoading(false)

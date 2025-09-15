@@ -1,7 +1,5 @@
-import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { Kanit } from 'next/font/google'
-import PrimaryButton from '@/components/PrimaryButton'
 import AddServiceCard2 from '@/components/AddServiceCard2'
 
 const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] })

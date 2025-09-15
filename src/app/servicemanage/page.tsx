@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import { Plus } from 'lucide-react'
 import { Kanit } from 'next/font/google'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -69,7 +68,7 @@ export default function ServiceMangePage() {
             setOpen(false)
             setEditingService(null)
             toast.success('ลบบริการสำเร็จ!')
-        } catch (error) {
+        } catch {
             toast.error('เกิดข้อผิดพลาดในการลบบริการ')
         }
     }
@@ -116,7 +115,7 @@ export default function ServiceMangePage() {
                                 {services.map((service) => {
                                     // คำนวณอายุจากวันเกิด
                                     const birthYear = new Date(
-                                        user?.birthdate || '1990-01-01'
+                                        user?.birthdate ?? '1990-01-01'
                                     ).getFullYear()
                                     const currentYear = new Date().getFullYear()
                                     const age = currentYear - birthYear
@@ -149,8 +148,8 @@ export default function ServiceMangePage() {
                                                     service.reviewCount
                                                 }
                                                 imgSrc={
-                                                    service.images[0] ||
-                                                    user?.img ||
+                                                    service.images[0] ??
+                                                    user?.img ??
                                                     '/img/provider1.png'
                                                 }
                                                 buttonTitle="แก้ไข"
@@ -178,17 +177,18 @@ export default function ServiceMangePage() {
                         if (!user) return
 
                         // รวมรูปเก่าและรูปใหม่
-                        const existingImages = formData.get('existingImages')
-                            ? JSON.parse(
-                                  formData.get('existingImages') as string
-                              )
+                        const existingImagesStr = formData.get(
+                            'existingImages'
+                        ) as string | null
+                        const existingImages: string[] = existingImagesStr
+                            ? (JSON.parse(existingImagesStr) as string[])
                             : []
                         const newImages = formData.getAll('images') as File[]
 
                         // TODO: ในระบบจริงควรอัปโหลดไฟล์ใหม่ไปเซิร์ฟเวอร์ก่อน
                         // ตอนนี้เราจะใช้ placeholder URLs
                         const newImageUrls = newImages.map(
-                            (_, index) =>
+                            () =>
                                 `/img/p${Math.floor(Math.random() * 16) + 1}.jpg`
                         )
 
@@ -198,14 +198,17 @@ export default function ServiceMangePage() {
                             description: formData.get('desc') as string,
                             categories: JSON.parse(
                                 formData.get('categories') as string
-                            ),
+                            ) as string[],
                             priceHour: parseInt(
                                 formData.get('priceHour') as string
                             ),
                             priceDay: parseInt(
                                 formData.get('priceDay') as string
                             ),
-                            images: [...existingImages, ...newImageUrls], // รวมรูปเก่าและรูปใหม่
+                            images: [
+                                ...existingImages,
+                                ...newImageUrls,
+                            ] as string[], // รวมรูปเก่าและรูปใหม่
                             active: true,
                         }
 
@@ -232,7 +235,7 @@ export default function ServiceMangePage() {
 
                         setOpen(false)
                         setEditingService(null)
-                    } catch (error) {
+                    } catch {
                         toast.error('เกิดข้อผิดพลาดในการบันทึกบริการ')
                     }
                 }}

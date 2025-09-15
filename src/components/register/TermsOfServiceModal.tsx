@@ -1,5 +1,4 @@
 'use client'
-import { useState } from 'react'
 
 interface TermsOfServiceModalProps {
     isOpen: boolean
@@ -50,7 +49,7 @@ export default function TermsOfServiceModal({
                                 1. การยอมรับข้อกำหนด
                             </h3>
                             <p>
-                                การใช้งานแพลตฟอร์ม "แฟนเช่า"
+                                การใช้งานแพลตฟอร์ม &quot;แฟนเช่า&quot;
                                 ถือว่าท่านได้ยอมรับและตกลงที่จะปฏิบัติตามข้อกำหนดและเงื่อนไขการใช้งานที่ระบุไว้ในเอกสารนี้
                             </p>
                         </section>

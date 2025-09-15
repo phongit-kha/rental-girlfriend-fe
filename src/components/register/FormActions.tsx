@@ -2,8 +2,12 @@ import Link from 'next/link'
 import { useState } from 'react'
 import TermsOfServiceModal from './TermsOfServiceModal'
 
+interface FormData {
+    acception: boolean
+}
+
 type FormActionsProps = {
-    formData: any
+    formData: FormData
     handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
     isLoading?: boolean
 }

@@ -117,7 +117,7 @@ export default function UserForm() {
             if (success) {
                 router.push('/')
             }
-        } catch (error) {
+        } catch {
             toast.error('เกิดข้อผิดพลาดในการสมัครสมาชิก')
         } finally {
             setIsLoading(false)

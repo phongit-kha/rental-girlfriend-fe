@@ -1,6 +1,13 @@
 import Image from 'next/image'
+interface FormData {
+    email: string
+    username: string
+    password: string
+    confirmPassword: string
+}
+
 type AccountFieldsProps = {
-    formData: any
+    formData: FormData
     handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
     getFieldError?: (fieldName: string) => string | undefined
 }

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Camera, X, Upload, Check } from 'lucide-react'
+import Image from 'next/image'
 
 interface User {
     img: string
@@ -23,7 +24,7 @@ export default function ChangeProfile({
     saveProfile: () => void
 }) {
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
+        if (e.target.files?.[0]) {
             const file = e.target.files[0]
             setTempImg(URL.createObjectURL(file))
         }
@@ -65,8 +66,11 @@ export default function ChangeProfile({
                                 รูปปัจจุบัน
                             </p>
                             <div className="flex h-[80px] w-[178px] items-center justify-center">
-                                <img
+                                <Image
                                     src={user.img}
+                                    alt="รูปโปรไฟล์ปัจจุบัน"
+                                    width={80}
+                                    height={80}
                                     className="box-border h-20 w-20 rounded-full border-[3px] border-white bg-cover bg-center"
                                 />
                             </div>
@@ -78,8 +82,11 @@ export default function ChangeProfile({
                                     ตัวอย่าง
                                 </p>
                                 <div className="flex h-[80px] w-[178px] items-center justify-center">
-                                    <img
+                                    <Image
                                         src={tempImg}
+                                        alt="ตัวอย่างรูปโปรไฟล์"
+                                        width={80}
+                                        height={80}
                                         className="box-border h-20 w-20 rounded-full border-[3px] border-white bg-cover bg-center"
                                     />
                                 </div>
@@ -124,9 +131,12 @@ export default function ChangeProfile({
                         <div className="grid h-[328px] w-[344px] grid-cols-4 gap-x-2 gap-y-1">
                             {avatars.map((url, i) => (
                                 <div key={i} className="relative">
-                                    <img
+                                    <Image
                                         key={i}
                                         src={url}
+                                        alt={`ตัวเลือกรูปโปรไฟล์ ${i + 1}`}
+                                        width={80}
+                                        height={80}
                                         onClick={() => {
                                             setTempImg(url)
                                             setSelectedAvatar(url)

@@ -2,14 +2,26 @@
 
 import { Mail, User, Phone, Calendar, CreditCard, Save } from 'lucide-react'
 
+interface User {
+    type: string
+    id: string
+    username: string
+    name: string
+    email: string
+    phone: string
+    birth: string
+    gender: string
+    interest: string
+}
+
 export default function PersonalInfoEdit({
     user,
     draft,
     handleDraftChange,
     handleSave,
 }: {
-    user: any
-    draft: any
+    user: User
+    draft: User
     handleDraftChange: (key: string, value: string) => void
     handleSave: (e: React.FormEvent) => void
 }) {

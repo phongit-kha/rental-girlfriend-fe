@@ -20,17 +20,17 @@ export default function ProfilePage() {
 
     // ใช้ข้อมูลจาก AuthContext แต่แปลงรูปแบบให้เข้ากับ component เดิม
     const getInitialUserData = () => ({
-        type: authUser?.type || 'customer',
-        img: authUser?.img || '/img/p2.jpg',
-        id: authUser?.idCard || '',
-        username: authUser?.username || '',
-        name: `${authUser?.firstName || ''} ${authUser?.lastName || ''}`.trim(),
-        email: authUser?.email || '',
-        phone: authUser?.phone || '',
-        birth: authUser?.birthdate || '',
-        gender: authUser?.gender || '',
-        interest: authUser?.interestedGender || '',
-        joined: authUser?.joined || '',
+        type: authUser?.type ?? 'customer',
+        img: authUser?.img ?? '/img/p2.jpg',
+        id: authUser?.idCard ?? '',
+        username: authUser?.username ?? '',
+        name: `${authUser?.firstName ?? ''} ${authUser?.lastName ?? ''}`.trim(),
+        email: authUser?.email ?? '',
+        phone: authUser?.phone ?? '',
+        birth: authUser?.birthdate ?? '',
+        gender: authUser?.gender ?? '',
+        interest: authUser?.interestedGender ?? '',
+        joined: authUser?.joined ?? '',
     })
 
     const [user, setUser] = useState(getInitialUserData)
@@ -79,11 +79,11 @@ export default function ProfilePage() {
 
         // แปลงข้อมูลกลับเป็นรูปแบบ User
         const [firstName, ...lastNameParts] = draft.name.split(' ')
-        const lastName = lastNameParts.join(' ') || ''
+        const lastName = lastNameParts.join(' ') ?? ''
 
         const updatedUser = {
             ...authUser,
-            firstName: firstName || '',
+            firstName: firstName ?? '',
             lastName,
             email: draft.email,
             phone: draft.phone,

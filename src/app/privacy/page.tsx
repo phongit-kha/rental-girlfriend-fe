@@ -50,10 +50,11 @@ export default function PrivacyPolicy() {
                             </div>
                             <div>
                                 <h3 className="font-semibold text-pink-800">
-                                    นโยบายความเป็นส่วนตัวฉบับใหม่ "แฟนเช่า"
+                                    นโยบายความเป็นส่วนตัวฉบับใหม่
+                                    &quot;แฟนเช่า&quot;
                                 </h3>
                                 <p className="mt-1 text-sm text-pink-700">
-                                    ปรับปรุง "แฟนเช่า"
+                                    ปรับปรุง &quot;แฟนเช่า&quot;
                                     ขอแจ้งให้ทราบถึงการเปลี่ยนแปลงนโยบายความเป็นส่วนตัวเพื่อให้สอดคล้องกับระบบใหม่
                                     โดยเราจะดำเนินการปรับปรุงข้อมูลให้ทันสมัยและปลอดภัยกว่าเดิม
                                     เริ่มตั้งแต่วันที่ปรับปรุงฉบับใหม่
@@ -74,22 +75,24 @@ export default function PrivacyPolicy() {
                                 <li className="flex items-start">
                                     <span className="mt-2 mr-2 h-1.5 w-1.5 rounded-full bg-pink-500"></span>
                                     <span>
-                                        "เรา" หมายถึง ทีมงานที่พัฒนาแอปพลิเคชัน
-                                        "แฟนเช่า"
+                                        &quot;เรา&quot; หมายถึง
+                                        ทีมงานที่พัฒนาแอปพลิเคชัน
+                                        &quot;แฟนเช่า&quot;
                                     </span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="mt-2 mr-2 h-1.5 w-1.5 rounded-full bg-pink-500"></span>
                                     <span>
-                                        "คุณ" หรือ "ท่าน" หมายถึง
+                                        &quot;คุณ&quot; หรือ &quot;ท่าน&quot;
+                                        หมายถึง
                                         บุคคลที่เข้ามาใช้บริการในแอปพลิเคชัน
-                                        "แฟนเช่า"
+                                        &quot;แฟนเช่า&quot;
                                     </span>
                                 </li>
                                 <li className="flex items-start">
                                     <span className="mt-2 mr-2 h-1.5 w-1.5 rounded-full bg-pink-500"></span>
                                     <span>
-                                        "ข้อมูลส่วนบุคคล" หมายถึง
+                                        &quot;ข้อมูลส่วนบุคคล&quot; หมายถึง
                                         ข้อมูลเกี่ยวกับบุคคลที่ทำให้สามารถระบุตัวตนของบุคคลนั้นได้
                                         เช่น ชื่อ นามสกุล เพศ อายุ ที่อยู่
                                         เบอร์โทรศัพท์ อีเมล เป็นต้น
@@ -138,7 +141,7 @@ export default function PrivacyPolicy() {
                                 การใช้ข้อมูลส่วนบุคคล
                             </h2>
                             <p className="mb-4 text-gray-700">
-                                ข้อมูลส่วน "แฟนเช่า"
+                                ข้อมูลส่วน &quot;แฟนเช่า&quot;
                                 จะใช้ข้อมูลส่วนบุคคลของคุณเพื่อการดำเนินงานดังต่อไปนี้
                             </p>
                             <ul className="space-y-2 text-gray-700">

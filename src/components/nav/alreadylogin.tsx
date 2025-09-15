@@ -6,8 +6,8 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import { ChevronDown, User, Settings, LogOut } from 'lucide-react'
 
 export default function Alreadylogin() {
-    const [messageCnt, setMessageCnt] = useState(4)
-    const [notifyCnt, setNotifyCnt] = useState(10)
+    const [messageCnt] = useState(4)
+    const [notifyCnt] = useState(10)
     const [showDropdown, setShowDropdown] = useState(false)
     const { user, logout, isProvider } = useAuthContext()
 
@@ -50,9 +50,11 @@ export default function Alreadylogin() {
                     className="flex cursor-pointer items-center gap-[10px] transition-all duration-300 hover:scale-105"
                 >
                     <div className="size-8">
-                        <img
-                            src={user?.img || '/img/p1.jpg'}
+                        <Image
+                            src={user?.img ?? '/img/p1.jpg'}
                             alt="smallprofile"
+                            width={32}
+                            height={32}
                             className="size-8 rounded-full object-cover"
                         />
                     </div>

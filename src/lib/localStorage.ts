@@ -52,7 +52,7 @@ const CURRENT_USER_KEY = 'rental_girlfriend_current_user'
 export const getUsers = (): User[] => {
     if (typeof window === 'undefined') return []
     const users = localStorage.getItem(USERS_KEY)
-    return users ? JSON.parse(users) : []
+    return users ? (JSON.parse(users) as User[]) : []
 }
 
 export const setUsers = (users: User[]): void => {
@@ -63,7 +63,7 @@ export const setUsers = (users: User[]): void => {
 export const getServices = (): Service[] => {
     if (typeof window === 'undefined') return []
     const services = localStorage.getItem(SERVICES_KEY)
-    return services ? JSON.parse(services) : []
+    return services ? (JSON.parse(services) as Service[]) : []
 }
 
 export const setServices = (services: Service[]): void => {
@@ -74,7 +74,7 @@ export const setServices = (services: Service[]): void => {
 export const getReviews = (): Review[] => {
     if (typeof window === 'undefined') return []
     const reviews = localStorage.getItem(REVIEWS_KEY)
-    return reviews ? JSON.parse(reviews) : []
+    return reviews ? (JSON.parse(reviews) as Review[]) : []
 }
 
 export const setReviews = (reviews: Review[]): void => {
@@ -85,7 +85,7 @@ export const setReviews = (reviews: Review[]): void => {
 export const getCurrentUser = (): User | null => {
     if (typeof window === 'undefined') return null
     const user = localStorage.getItem(CURRENT_USER_KEY)
-    return user ? JSON.parse(user) : null
+    return user ? (JSON.parse(user) as User) : null
 }
 
 export const setCurrentUser = (user: User | null): void => {
