@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Kanit } from 'next/font/google'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { getUsers, setUsers } from '@/lib/localStorage'
+import { updateUser as updateUserInStorage } from '@/lib/localStorage'
 
 import ProfileBanner from '@/components/profile/ProfileBanner'
 import PersonalInfo from '@/components/profile/PersonalInfo'
@@ -18,7 +18,6 @@ export default function ProfilePage() {
     const { user: authUser, updateUser, isAuthenticated } = useAuthContext()
     const router = useRouter()
 
-    // ใช้ข้อมูลจาก AuthContext แต่แปลงรูปแบบให้เข้ากับ component เดิม
     const getInitialUserData = () => ({
         type: authUser?.type ?? 'customer',
         img: authUser?.img ?? '/img/p2.jpg',
@@ -35,9 +34,26 @@ export default function ProfilePage() {
 
     const [user, setUser] = useState(getInitialUserData)
 
+    // Track if we're currently updating to prevent useEffect from overriding
+    const [isUpdating, setIsUpdating] = useState(false)
+
     useEffect(() => {
+        console.log('🔄 [Profile] useEffect triggered')
+        console.log('🔄 [Profile] isAuthenticated:', isAuthenticated)
+        console.log('🔄 [Profile] authUser:', authUser)
+        console.log('🔄 [Profile] isUpdating:', isUpdating)
+
         if (!isAuthenticated) {
+            console.log('❌ [Profile] Not authenticated, redirecting to login')
             router.push('/login')
+            return
+        }
+
+        // Don't update state if we're currently in the middle of an update
+        if (isUpdating) {
+            console.log(
+                '⏸️ [Profile] Skipping useEffect update - currently updating'
+            )
             return
         }
 
@@ -55,10 +71,12 @@ export default function ProfilePage() {
                 interest: authUser.interestedGender,
                 joined: authUser.joined,
             }
+            console.log('📝 [Profile] Setting new user data:', newUserData)
             setUser(newUserData)
             setDraft(newUserData) // sync draft ด้วย
+            console.log('✅ [Profile] User data updated in useEffect')
         }
-    }, [authUser, isAuthenticated, router])
+    }, [authUser, isAuthenticated, router, isUpdating])
 
     const [changeProfile, setChangeProfile] = useState(false)
 
@@ -74,8 +92,14 @@ export default function ProfilePage() {
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault()
+        console.log('💾 [Profile] handleSave called')
+        console.log('💾 [Profile] Current authUser:', authUser)
+        console.log('💾 [Profile] Current draft:', draft)
 
-        if (!authUser) return
+        if (!authUser) {
+            console.error('❌ [Profile] No authUser available')
+            return
+        }
 
         // แปลงข้อมูลกลับเป็นรูปแบบ User
         const [firstName, ...lastNameParts] = draft.name.split(' ')
@@ -93,17 +117,67 @@ export default function ProfilePage() {
             img: draft.img,
         }
 
-        // อัปเดตใน localStorage
-        const users = getUsers()
-        const userIndex = users.findIndex((u) => u.id === authUser.id)
-        if (userIndex !== -1) {
-            users[userIndex] = updatedUser
-            setUsers(users)
-            updateUser(updatedUser)
+        console.log('🔄 [Profile] Prepared updatedUser:', updatedUser)
 
-            // อัปเดต state ให้สอดคล้องกัน
-            setUser(draft)
+        try {
+            console.log('🚀 [Profile] Starting user update process')
+            setIsUpdating(true) // Set flag to prevent useEffect from overriding
+
+            // อัปเดตใน localStorage
+            const updatedUserData = updateUserInStorage(authUser.id, {
+                firstName: firstName ?? '',
+                lastName,
+                username: draft.username,
+                email: draft.email,
+                phone: draft.phone,
+                birthdate: draft.birth,
+                gender: draft.gender,
+                interestedGender: draft.interest,
+                img: draft.img,
+            })
+
+            console.log(
+                '✅ [Profile] localStorage update successful:',
+                updatedUserData
+            )
+
+            // อัปเดต context
+            console.log('🔄 [Profile] Updating auth context')
+            updateUser(updatedUserData)
+
+            // อัปเดต state ให้สอดคล้องกัน (ใช้ข้อมูลจาก updatedUserData)
+            const newUserData = {
+                type: updatedUserData.type,
+                img: updatedUserData.img,
+                id: updatedUserData.idCard,
+                username: updatedUserData.username,
+                name: `${updatedUserData.firstName || ''} ${updatedUserData.lastName || ''}`.trim(),
+                email: updatedUserData.email,
+                phone: updatedUserData.phone,
+                birth: updatedUserData.birthdate,
+                gender: updatedUserData.gender,
+                interest: updatedUserData.interestedGender,
+                joined: updatedUserData.joined,
+            }
+            console.log('📝 [Profile] Setting new user data:', newUserData)
+            setUser(newUserData)
+            setDraft(newUserData)
             setEditProfile(false) // ปิด edit mode หลังบันทึกสำเร็จ
+            console.log('✅ [Profile] Profile update completed successfully')
+
+            // Reset the updating flag after a short delay to allow state to settle
+            setTimeout(() => {
+                setIsUpdating(false)
+                console.log('🔓 [Profile] Update flag cleared')
+            }, 100)
+        } catch (error) {
+            console.error('❌ [Profile] Error updating user:', error)
+            setIsUpdating(false) // Reset flag on error
+            alert(
+                error instanceof Error
+                    ? error.message
+                    : 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล'
+            )
         }
     }
 
@@ -164,27 +238,74 @@ export default function ProfilePage() {
                     setChangeProfile={() => setChangeProfile(false)}
                     setTempImg={(url) => setTempImg(url)}
                     saveProfile={() => {
-                        if (tempImg && authUser) {
-                            const updatedUser = { ...authUser, img: tempImg }
-                            const users = getUsers()
-                            const userIndex = users.findIndex(
-                                (u) => u.id === authUser.id
-                            )
-                            if (userIndex !== -1) {
-                                users[userIndex] = updatedUser
-                                setUsers(users)
-                                updateUser(updatedUser)
+                        console.log('🖼️ [Profile] saveProfile called')
+                        console.log('🖼️ [Profile] tempImg:', tempImg)
+                        console.log('🖼️ [Profile] authUser:', authUser)
 
-                                // อัปเดต state ทั้งหมดให้สอดคล้องกัน
+                        if (tempImg && authUser) {
+                            try {
+                                console.log(
+                                    '🚀 [Profile] Starting profile image update'
+                                )
+                                // อัปเดตใน localStorage
+                                const updatedUserData = updateUserInStorage(
+                                    authUser.id,
+                                    {
+                                        img: tempImg,
+                                    }
+                                )
+
+                                console.log(
+                                    '✅ [Profile] Profile image update successful:',
+                                    updatedUserData
+                                )
+
+                                // อัปเดต context
+                                console.log(
+                                    '🔄 [Profile] Updating auth context for profile image'
+                                )
+                                updateUser(updatedUserData)
+
+                                // อัปเดต state ทั้งหมดให้สอดคล้องกัน (ใช้ข้อมูลจาก updatedUserData)
                                 const newUserData = {
-                                    ...user,
-                                    img: tempImg,
+                                    type: updatedUserData.type,
+                                    img: updatedUserData.img,
+                                    id: updatedUserData.idCard,
+                                    username: updatedUserData.username,
+                                    name: `${updatedUserData.firstName || ''} ${updatedUserData.lastName || ''}`.trim(),
+                                    email: updatedUserData.email,
+                                    phone: updatedUserData.phone,
+                                    birth: updatedUserData.birthdate,
+                                    gender: updatedUserData.gender,
+                                    interest: updatedUserData.interestedGender,
+                                    joined: updatedUserData.joined,
                                 }
+                                console.log(
+                                    '📝 [Profile] Setting new user data for profile image:',
+                                    newUserData
+                                )
                                 setUser(newUserData)
                                 setDraft(newUserData)
                                 setChangeProfile(false)
                                 setTempImg(null)
+                                console.log(
+                                    '✅ [Profile] Profile image update completed successfully'
+                                )
+                            } catch (error) {
+                                console.error(
+                                    '❌ [Profile] Error updating profile image:',
+                                    error
+                                )
+                                alert(
+                                    error instanceof Error
+                                        ? error.message
+                                        : 'เกิดข้อผิดพลาดในการอัปเดตรูปโปรไฟล์'
+                                )
                             }
+                        } else {
+                            console.warn(
+                                '⚠️ [Profile] Missing tempImg or authUser for profile image update'
+                            )
                         }
                     }}
                 />
