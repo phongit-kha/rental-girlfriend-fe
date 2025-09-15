@@ -88,7 +88,10 @@ export default function UserForm() {
 
             // Show first error as toast
             if (validationResult.errors.length > 0) {
-                toast.error(validationResult.errors[0].message)
+                toast.error(
+                    validationResult.errors[0]?.message ??
+                        'เกิดข้อผิดพลาดในการตรวจสอบข้อมูล'
+                )
             }
             return
         }

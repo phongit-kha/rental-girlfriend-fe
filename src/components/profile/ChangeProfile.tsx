@@ -24,8 +24,8 @@ export default function ChangeProfile({
     saveProfile: () => void
 }) {
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files?.[0]) {
-            const file = e.target.files[0]
+        const file = e.target.files?.[0]
+        if (file) {
             setTempImg(URL.createObjectURL(file))
         }
     }
