@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
-import { X, Upload, Plus, FileText, Save } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { X, Upload, Plus, FileText, Save, Trash2 } from 'lucide-react'
 import { Kanit } from 'next/font/google'
+import { Service } from '@/lib/localStorage'
 
 const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] })
 
@@ -10,6 +11,8 @@ type Props = {
     open: boolean
     onClose: () => void
     onSave: (data: FormData) => void
+    onDelete?: () => void
+    editingService?: Service | null
 }
 
 const CATEGORIES = [
@@ -27,13 +30,42 @@ const CATEGORIES = [
     'อื่น ๆ',
 ]
 
-export default function ServiceModal({ open, onClose, onSave }: Props) {
+export default function ServiceModal({
+    open,
+    onClose,
+    onSave,
+    onDelete,
+    editingService,
+}: Props) {
     const [name, setName] = useState('')
     const [desc, setDesc] = useState('')
     const [priceHour, setPriceHour] = useState('')
     const [priceDay, setPriceDay] = useState('')
     const [cats, setCats] = useState<string[]>([])
     const [files, setFiles] = useState<File[]>([])
+    const [existingImages, setExistingImages] = useState<string[]>([])
+
+    // เมื่อเปิด modal ให้ load ข้อมูลถ้าเป็นการแก้ไข
+    useEffect(() => {
+        if (editingService) {
+            setName(editingService.name)
+            setDesc(editingService.description)
+            setPriceHour(editingService.priceHour.toString())
+            setPriceDay(editingService.priceDay.toString())
+            setCats(editingService.categories)
+            setFiles([]) // รีเซ็ตไฟล์ใหม่
+            setExistingImages(editingService.images || []) // โหลดรูปที่มีอยู่
+        } else {
+            // รีเซ็ตฟอร์มสำหรับการสร้างใหม่
+            setName('')
+            setDesc('')
+            setPriceHour('')
+            setPriceDay('')
+            setCats([])
+            setFiles([])
+            setExistingImages([])
+        }
+    }, [editingService, open])
 
     if (!open) return null
 
@@ -43,7 +75,8 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
     const addFiles = (fl: FileList | null) => {
         if (!fl) return
         setFiles((prev) => {
-            const remain = 3 - prev.length
+            const totalImages = existingImages.length + prev.length
+            const remain = 3 - totalImages
             if (remain <= 0) return prev
             const incoming = Array.from(fl).slice(0, remain)
             return [...prev, ...incoming]
@@ -55,11 +88,14 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
         desc.trim() !== '' &&
         priceHour.trim() !== '' &&
         priceDay.trim() !== '' &&
-        files.length > 0 &&
+        (files.length > 0 || existingImages.length > 0) && // มีรูปอย่างน้อย 1 รูป (ใหม่หรือเก่า)
         cats.length > 0
 
     const removeFile = (idx: number) =>
         setFiles((p) => p.filter((_, i) => i !== idx))
+
+    const removeExistingImage = (idx: number) =>
+        setExistingImages((p) => p.filter((_, i) => i !== idx))
 
     const submit = (e: React.FormEvent) => {
         e.preventDefault()
@@ -70,6 +106,7 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
         fd.append('priceHour', priceHour)
         fd.append('priceDay', priceDay)
         fd.append('categories', JSON.stringify(cats))
+        fd.append('existingImages', JSON.stringify(existingImages)) // ส่งรูปเก่าที่เหลือ
         files.forEach((f) => fd.append('images', f))
         onSave(fd)
     }
@@ -89,7 +126,9 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
                         <div className="mt-3 flex items-center gap-2">
                             <FileText className="h-5 w-5 text-[#F24472]" />
                             <h3 className="text-[19px] font-bold text-black">
-                                สร้างบริการของคุณ
+                                {editingService
+                                    ? 'แก้ไขบริการของคุณ'
+                                    : 'สร้างบริการของคุณ'}
                             </h3>
                         </div>
                         <button
@@ -108,9 +147,31 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
                             อัปโหลดรูป *
                         </label>
                         <div className="mt-2 flex w-full gap-3">
+                            {/* แสดงรูปเก่าที่มีอยู่แล้ว */}
+                            {existingImages.map((imgSrc, i) => (
+                                <div
+                                    key={`existing-${i}`}
+                                    className="relative h-35 max-w-53 flex-grow overflow-hidden rounded-lg"
+                                >
+                                    <img
+                                        src={imgSrc}
+                                        alt={`รูปที่ ${i + 1}`}
+                                        className="h-full w-full object-cover"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => removeExistingImage(i)}
+                                        className="absolute top-1 right-1 cursor-pointer rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
+                                    >
+                                        <X className="h-4 w-4" />
+                                    </button>
+                                </div>
+                            ))}
+
+                            {/* แสดงรูปใหม่ที่อัปโหลด */}
                             {files.map((f, i) => (
                                 <div
-                                    key={i}
+                                    key={`new-${i}`}
                                     className="relative h-35 max-w-53 flex-grow overflow-hidden rounded-lg"
                                 >
                                     {/* ใช้ <img> เพื่อพรีวิว blob ได้ทันที */}
@@ -122,13 +183,15 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
                                     <button
                                         type="button"
                                         onClick={() => removeFile(i)}
-                                        className="absolute top-1 right-1 cursor-pointer rounded-full p-1 transition-colors duration-300 hover:bg-white"
+                                        className="absolute top-1 right-1 cursor-pointer rounded-full bg-red-500 p-1 text-white transition-colors duration-300 hover:bg-red-600"
                                     >
                                         <X className="h-4 w-4" />
                                     </button>
                                 </div>
                             ))}
-                            {files.length < 3 && (
+
+                            {/* ปุ่มอัปโหลดใหม่ (แสดงเมื่อยังไม่ครบ 3 รูป) */}
+                            {existingImages.length + files.length < 3 && (
                                 <label className="flex h-36 flex-grow cursor-pointer items-center justify-center rounded-lg border-2 border-dashed border-gray-400 text-center text-xs text-gray-500 hover:bg-gray-50">
                                     <input
                                         type="file"
@@ -240,22 +303,36 @@ export default function ServiceModal({ open, onClose, onSave }: Props) {
                         <hr className="mt-6 border-gray-300" />
 
                         {/* Footer */}
-                        <div className="mt-6 flex items-center justify-end gap-3">
-                            <button
-                                type="button"
-                                onClick={onClose}
-                                className="cursor-pointer rounded-md border border-[#E2E8F0] px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                            >
-                                ยกเลิก
-                            </button>
-                            <button
-                                disabled={!isComplete}
-                                type="submit"
-                                className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-rose-500 bg-gradient-to-r from-pink-600 to-rose-500 px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
-                            >
-                                <Save className="h-4 w-4" />
-                                บันทึก
-                            </button>
+                        <div className="mt-6 flex items-center justify-between gap-3">
+                            <div>
+                                {editingService && onDelete && (
+                                    <button
+                                        type="button"
+                                        onClick={onDelete}
+                                        className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-red-600 px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:bg-red-700"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        ลบบริการ
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex gap-3">
+                                <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="cursor-pointer rounded-md border border-[#E2E8F0] px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                                >
+                                    ยกเลิก
+                                </button>
+                                <button
+                                    disabled={!isComplete}
+                                    type="submit"
+                                    className="inline-flex cursor-pointer items-center gap-2 rounded-md bg-rose-500 bg-gradient-to-r from-pink-600 to-rose-500 px-4 py-2 text-sm font-semibold text-white transition-all duration-300 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
+                                >
+                                    <Save className="h-4 w-4" />
+                                    {editingService ? 'อัปเดต' : 'บันทึก'}
+                                </button>
+                            </div>
                         </div>
                     </form>
                 </div>
