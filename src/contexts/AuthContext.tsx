@@ -8,7 +8,10 @@ import type { User } from '@/lib/localStorage'
 interface AuthContextType {
     user: User | null
     loading: boolean
-    login: (email: string, password: string) => Promise<boolean>
+    login: (
+        email: string,
+        password: string
+    ) => Promise<{ success: boolean; user?: User }>
     register: (
         userData: Omit<User, 'id' | 'joined' | 'verified'>
     ) => Promise<boolean>

@@ -95,8 +95,6 @@ export default function ServiceModal({
             const base64Images: string[] = []
 
             for (const file of filesToProcess) {
-                console.log('📸 [ServiceModal] Processing image:', file.name)
-
                 const result = await processImageFile(file, {
                     maxWidth: 800,
                     maxHeight: 600,
@@ -105,16 +103,10 @@ export default function ServiceModal({
                 })
 
                 base64Images.push(result.base64)
-                console.log(
-                    '✅ [ServiceModal] Image processed:',
-                    result.fileName
-                )
             }
 
             setNewImages((prev) => [...prev, ...base64Images])
-            console.log('✅ [ServiceModal] All images processed successfully')
         } catch (error) {
-            console.error('❌ [ServiceModal] Error processing images:', error)
             setUploadError(
                 error instanceof Error
                     ? error.message

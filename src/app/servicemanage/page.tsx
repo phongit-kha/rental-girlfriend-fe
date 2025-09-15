@@ -184,11 +184,6 @@ export default function ServiceMangePage() {
                             ? (JSON.parse(imagesStr) as string[])
                             : []
 
-                        console.log(
-                            '📸 [ServiceManage] Received images:',
-                            allImages.length
-                        )
-
                         const serviceData = {
                             providerId: user.id,
                             name: formData.get('name') as string,

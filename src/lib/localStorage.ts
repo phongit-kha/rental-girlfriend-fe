@@ -144,21 +144,12 @@ export const logoutUser = (): void => {
 
 // Update user information
 export const updateUser = (userId: string, updates: Partial<User>): User => {
-    console.log('🔧 [localStorage] updateUser called with userId:', userId)
-    console.log('🔧 [localStorage] Updates:', updates)
-
     const users = getUsers()
-    console.log('📋 [localStorage] Current users count:', users.length)
-
     const userIndex = users.findIndex((u) => u.id === userId)
-    console.log('🔍 [localStorage] User index found:', userIndex)
 
     if (userIndex === -1) {
-        console.error('❌ [localStorage] User not found with id:', userId)
         throw new Error('ไม่พบผู้ใช้ที่ต้องการแก้ไข')
     }
-
-    console.log('👤 [localStorage] Original user:', users[userIndex])
 
     // ตรวจสอบอีเมลซ้ำ (ถ้ามีการอัปเดตอีเมล)
     if (updates.email && updates.email !== users[userIndex].email) {
@@ -166,10 +157,6 @@ export const updateUser = (userId: string, updates: Partial<User>): User => {
             (u) => u.email === updates.email && u.id !== userId
         )
         if (emailExists) {
-            console.error(
-                '❌ [localStorage] Email already exists:',
-                updates.email
-            )
             throw new Error('อีเมลนี้ถูกใช้งานแล้ว')
         }
     }
@@ -180,31 +167,21 @@ export const updateUser = (userId: string, updates: Partial<User>): User => {
             (u) => u.username === updates.username && u.id !== userId
         )
         if (usernameExists) {
-            console.error(
-                '❌ [localStorage] Username already exists:',
-                updates.username
-            )
             throw new Error('ชื่อผู้ใช้นี้ถูกใช้งานแล้ว')
         }
     }
 
     const updatedUser = { ...users[userIndex], ...updates }
-    console.log('🔄 [localStorage] Updated user object:', updatedUser)
-
     const updatedUsers = [...users]
     updatedUsers[userIndex] = updatedUser
-    console.log('📝 [localStorage] Saving updated users to localStorage')
     setUsers(updatedUsers)
 
     // อัปเดต current user ด้วย (ถ้าเป็นผู้ใช้ปัจจุบัน)
     const currentUser = getCurrentUser()
-    console.log('👤 [localStorage] Current user before update:', currentUser)
     if (currentUser && currentUser.id === userId) {
-        console.log('🔄 [localStorage] Updating current user in localStorage')
         setCurrentUser(updatedUser)
     }
 
-    console.log('✅ [localStorage] User update completed successfully')
     return updatedUser
 }
 

@@ -15,9 +15,6 @@ export default function Register() {
     // Redirect if already authenticated
     useEffect(() => {
         if (isAuthenticated && user) {
-            console.log(
-                '🔄 [Register] User already authenticated, redirecting...'
-            )
             if (user.type === 'provider') {
                 router.push('/servicemanage')
             } else {

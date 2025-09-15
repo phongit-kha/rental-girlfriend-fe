@@ -35,11 +35,6 @@ export default function ChangeProfile({
         setUploadError(null)
 
         try {
-            console.log(
-                '📸 [ChangeProfile] Processing uploaded image:',
-                file.name
-            )
-
             // Process image: validate, resize, and convert to base64
             const result = await processImageFile(file, {
                 maxWidth: 400,
@@ -48,15 +43,8 @@ export default function ChangeProfile({
                 resize: true,
             })
 
-            console.log('✅ [ChangeProfile] Image processed successfully:', {
-                fileName: result.fileName,
-                fileSize: result.fileSize,
-                mimeType: result.mimeType,
-            })
-
             setTempImg(result.base64)
         } catch (error) {
-            console.error('❌ [ChangeProfile] Error processing image:', error)
             setUploadError(
                 error instanceof Error
                     ? error.message
@@ -158,7 +146,7 @@ export default function ChangeProfile({
                                     type="file"
                                     accept="image/jpeg,image/jpg,image/png,image/webp"
                                     onChange={(e) => {
-                                        handleUpload(e)
+                                        void handleUpload(e)
                                         setSelectedAvatar(null)
                                     }}
                                     disabled={isUploading}
@@ -195,9 +183,8 @@ export default function ChangeProfile({
                                                 : 'text-[#6B7280]'
                                         }`}
                                     >
-                                        {uploadError
-                                            ? uploadError
-                                            : 'JPG, PNG, WebP (สูงสุด 5MB)'}
+                                        {uploadError ??
+                                            'JPG, PNG, WebP (สูงสุด 5MB)'}
                                     </p>
                                 </div>
                             </label>

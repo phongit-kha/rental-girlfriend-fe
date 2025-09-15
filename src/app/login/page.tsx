@@ -17,7 +17,6 @@ export default function Home() {
     // Redirect if already authenticated
     useEffect(() => {
         if (isAuthenticated && user) {
-            console.log('🔄 [Login] User already authenticated, redirecting...')
             if (user.type === 'provider') {
                 router.push('/servicemanage')
             } else {
@@ -45,13 +44,9 @@ export default function Home() {
         setIsLoading(false)
 
         if (result.success && result.user) {
-            console.log(
-                '✅ [Login] Login successful, user type:',
-                result.user.type
-            )
-
             // Redirect based on user type
-            if (result.user.type === 'provider') {
+            const userType = result.user.type
+            if (userType === 'provider') {
                 router.push('/servicemanage')
             } else {
                 router.push('/')

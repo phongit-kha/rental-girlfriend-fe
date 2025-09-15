@@ -64,9 +64,9 @@ export const validateImageFile = (
  */
 export const resizeImage = (
     file: File,
-    maxWidth: number = 800,
-    maxHeight: number = 600,
-    quality: number = 0.8
+    maxWidth = 800,
+    maxHeight = 600,
+    quality = 0.8
 ): Promise<string> => {
     return new Promise((resolve, reject) => {
         const canvas = document.createElement('canvas')
@@ -172,7 +172,7 @@ export const isBase64Image = (str: string): boolean => {
  */
 export const getBase64FileSize = (base64: string): number => {
     // Remove data URL prefix
-    const base64Data = base64.split(',')[1] || base64
+    const base64Data = base64.split(',')[1] ?? base64
 
     // Calculate approximate file size
     const padding = base64Data.endsWith('==')
@@ -188,7 +188,7 @@ export const getBase64FileSize = (base64: string): number => {
  */
 export const compressBase64Image = (
     base64: string,
-    maxSizeKB: number = 500
+    maxSizeKB = 500
 ): Promise<string> => {
     return new Promise((resolve, reject) => {
         const canvas = document.createElement('canvas')

@@ -17,16 +17,13 @@ export const useAuth = () => {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        console.log('🚀 [useAuth] useEffect - Initializing auth')
         // Initialize sample data on first load
         initializeSampleData()
 
         // Get current user from localStorage
         const currentUser = getCurrentUser()
-        console.log('👤 [useAuth] Current user from localStorage:', currentUser)
         setUser(currentUser)
         setLoading(false)
-        console.log('✅ [useAuth] Auth initialized')
     }, [])
 
     const login = async (
@@ -81,11 +78,8 @@ export const useAuth = () => {
     }
 
     const updateUser = (updatedUser: User) => {
-        console.log('🔄 [useAuth] updateUser called with:', updatedUser)
-        console.log('🔄 [useAuth] Current user before update:', user)
         setUser(updatedUser)
         setCurrentUser(updatedUser)
-        console.log('✅ [useAuth] User updated successfully')
     }
 
     return {
