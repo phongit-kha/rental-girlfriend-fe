@@ -1,4 +1,7 @@
 import Link from 'next/link'
+import { useState } from 'react'
+import TermsOfServiceModal from './TermsOfServiceModal'
+
 type FormActionsProps = {
     formData: any
     handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void
@@ -9,6 +12,25 @@ export default function FormActions({
     handleChange,
     isLoading = false,
 }: FormActionsProps) {
+    const [isTermsModalOpen, setIsTermsModalOpen] = useState(false)
+
+    const handleTermsClick = (e: React.MouseEvent) => {
+        e.preventDefault()
+        setIsTermsModalOpen(true)
+    }
+
+    const handleAcceptTerms = () => {
+        // Automatically check the acceptance checkbox
+        const event = {
+            target: {
+                name: 'acception',
+                type: 'checkbox',
+                checked: true,
+            },
+        } as React.ChangeEvent<HTMLInputElement>
+        handleChange(event)
+    }
+
     return (
         <div>
             <div className="flex items-center">
@@ -26,12 +48,13 @@ export default function FormActions({
                     className="ml-2 block text-sm text-[#212b36]"
                 >
                     ฉันยอมรับ{' '}
-                    <Link
-                        href="#"
-                        className="font-medium text-[#f24472] hover:underline"
+                    <button
+                        type="button"
+                        onClick={handleTermsClick}
+                        className="cursor-pointer font-medium text-[#f24472] hover:underline focus:outline-none"
                     >
                         ข้อกำหนดการใช้งาน
-                    </Link>{' '}
+                    </button>{' '}
                     และ{' '}
                     <Link
                         href="#"
@@ -54,6 +77,12 @@ export default function FormActions({
             >
                 {isLoading ? 'กำลังสมัครสมาชิก...' : 'สมัครสมาชิก'}
             </button>
+
+            <TermsOfServiceModal
+                isOpen={isTermsModalOpen}
+                onClose={() => setIsTermsModalOpen(false)}
+                onAccept={handleAcceptTerms}
+            />
         </div>
     )
 }
