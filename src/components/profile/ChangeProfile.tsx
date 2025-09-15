@@ -1,6 +1,7 @@
 'use client';
 
-import { Camera, X, Upload } from "lucide-react";
+import { useState } from "react";
+import { Camera, X, Upload, Check } from "lucide-react";
 
 interface User {
     img: string;
@@ -28,6 +29,8 @@ export default function ChangeProfile({
             setTempImg(URL.createObjectURL(file));
         }
     };
+
+    const [selectedAvatar, setSelectedAvatar] = useState<string | null>(null);
     
     return (
         <div className="absolute w-[100%] h-[100%] top-0 left-0 bg-[rgba(33,43,54,0.5)]">
@@ -48,7 +51,7 @@ export default function ChangeProfile({
                 <div className="w-[534px] h-[1px] bg-[#D9D9D9]"/>
 
                 <div className="w-[534px] h-[362px] flex items-start gap-[12px]">
-                    <div className="w-[178px] h-[253px] flex flex-col items-start gap-[12px]">
+                    <div className="w-[178px] flex flex-col items-start gap-[12px]">
                         {/* รูปปัจจุบัน */}
                         <div className="w-[178px] h-[114px] flex flex-col items-start gap-[12px]">
                             <p className="w-[178px] h-[22px] font-normal text-[16px] leading-[140%] text-black">
@@ -56,19 +59,32 @@ export default function ChangeProfile({
                             </p>
                             <div className="w-[178px] h-[80px] flex justify-center items-center">
                                 <img
-                                    src={tempImg || user.img}
-                                    alt="profile"
+                                    src={user.img}
                                     className="box-border w-20 h-20 rounded-full bg-cover bg-center border-[3px] border-white rounded-full"
                                 />
                             </div>
                         </div>
+                        {/* ตัวอย่าง */}
+                        {tempImg && (
+                            <div className="w-[178px] h-[114px] flex flex-col items-start gap-[12px]">
+                                <p className="w-[178px] h-[22px] font-normal text-[16px] leading-[140%] text-black">
+                                    ตัวอย่าง
+                                </p>
+                                <div className="w-[178px] h-[80px] flex justify-center items-center">
+                                    <img
+                                        src={tempImg}
+                                        className="box-border w-20 h-20 rounded-full bg-cover bg-center border-[3px] border-white rounded-full"
+                                    />
+                                </div>
+                            </div>
+                        )}
                         {/* อัปโหลดรูป */}
                         <div className="w-[178px] h-[127px] flex flex-col items-start gap-[12px]">
                             <p className="w-[178px] h-[22px] font-normal text-[16px] leading-[140%] text-black">
                                 อัปโหลดรูป
                             </p>
                             <label className="flex flex-col items-center p-3 px-7 gap-2 w-[178px] h-[93px] border border-dashed border-[#6B7280] rounded-lg">
-                                <input type="file" accept="image/*" onChange={handleUpload} hidden />
+                                <input type="file" accept="image/*" onChange={(e) => {handleUpload(e); setSelectedAvatar(null);}} hidden />
                                 <Upload strokeWidth={1.5} className="w-6 h-6 text-[#6B7280]"/>
                                 <div className="flex flex-col items-start gap-1 w-[122px] h-[37px]">
                                     <p className="w-[122px] h-[18px] font-normal text-[13px] leading-[140%] text-center text-[#6B7280]">
@@ -89,12 +105,21 @@ export default function ChangeProfile({
                         {/* รูปให้เลือก */}
                         <div className="w-[344px] h-[328px] grid grid-cols-4 gap-x-2 gap-y-1">
                             {avatars.map((url, i) => (
-                                <img
-                                    key={i}
-                                    src={url}
-                                    onClick={() => setTempImg(url)}
-                                    className={`box-border w-20 h-20 left-0 top-0 rounded-lg`}
-                                />
+                                <div key={i} className="relative">
+                                    <img
+                                        key={i}
+                                        src={url}
+                                        onClick={() => {setTempImg(url); setSelectedAvatar(url)}}
+                                        className={`box-border w-20 h-20 left-0 top-0 rounded-lg ${selectedAvatar === url ? 'border-2 border-[#F24472]' : ''}`}
+                                    />
+                                    {selectedAvatar === url && (
+                                        <div className="">
+                                            <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-6 h-6 flex justify-center items-center bg-[#F24472] rounded-full z-1">
+                                                <Check strokeWidth={1.25} className="text-white w-6 h-6 z-2" />
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
                             ))}
                         </div>
                     </div>

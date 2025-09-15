@@ -1,6 +1,6 @@
 import { Camera } from "lucide-react";
 
-export default function ProfileBanner({ user, setChangeProfile }: any) {
+export default function ProfileBanner({ user, setChangeProfile, setEditProfile, editProfile }: any) {
     return (
         <section className="flex justify-between p-7 gap-3 w-[762px] h-[160px] rounded-xl bg-[linear-gradient(133.15deg,#F24BA7_2.02%,#EF4444_98.99%)]">  
             <div className="w-65.25 h-20 flex items-end gap-3 pt-26">
@@ -22,13 +22,20 @@ export default function ProfileBanner({ user, setChangeProfile }: any) {
             </div>
 
             <div className="flex justify-end items-start w-[102px] h-[34px]">
-                <a href="/profile/edit">
-                    <button className="flex flex-row justify-center items-center px-4 py-2 gap-[10px] w-[102px] h-[34px] bg-[rgba(244,246,248,0.5)] rounded-md">
+                {editProfile ? (
+                    <button onClick={() => setEditProfile(false)} className="flex flex-row justify-center items-center px-4 py-2 gap-[10px] w-[69px] h-[34px] bg-[rgba(244,246,248,0.5)] rounded-md">
+                        <p className="w-[70px] h-[18px] font-bold text-[13px] leading-[140%] text-white">
+                            ยกเลิก
+                        </p>
+                    </button>
+                ) : (
+                    <button onClick={() => setEditProfile(true)} className="flex flex-row justify-center items-center px-4 py-2 gap-[10px] w-[102px] h-[34px] bg-[rgba(244,246,248,0.5)] rounded-md">
                         <p className="w-[70px] h-[18px] font-bold text-[13px] leading-[140%] text-white">
                             แก้ไขโปรไฟล์
                         </p>
                     </button>
-                </a>
+                )}
+                    
             </div>
         </section>
     );
