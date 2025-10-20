@@ -101,6 +101,7 @@ export default function ServicePage() {
                                 return (
                                     <Card
                                         key={service.id}
+                                        id={service.id}
                                         Name={`${service.name}`}
                                         Age={age}
                                         Rating={service.rating}

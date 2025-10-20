@@ -9,6 +9,7 @@ export default function AddServiceCard2() {
 
             <div className="flex content-center justify-between">
                 <Card
+                    id="1"
                     Name="สมหญิง ว้อนชาย"
                     Age={25}
                     Rating={4.8}
@@ -24,6 +25,7 @@ export default function AddServiceCard2() {
                     Categories={['ดูหนัง', 'ทานอาหาร', 'เดินเล่น']}
                 />
                 <Card
+                    id="2"
                     Name="สมหญิง ว้อนชาย"
                     Age={25}
                     Rating={4.8}
@@ -39,6 +41,7 @@ export default function AddServiceCard2() {
                     Categories={['ช้อปปิ้ง', 'คอนเสิร์ต', 'ท่องเที่ยว']}
                 />
                 <Card
+                    id="3"
                     Name="สมหญิง ว้อนชาย"
                     Age={25}
                     Rating={4.8}

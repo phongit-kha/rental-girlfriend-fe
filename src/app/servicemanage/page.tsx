@@ -129,6 +129,7 @@ export default function ServiceMangePage() {
                                             className="w-full cursor-pointer"
                                         >
                                             <Card
+                                                id={service.id}
                                                 Name={`${service.name}`}
                                                 Age={age}
                                                 Rating={service.rating}

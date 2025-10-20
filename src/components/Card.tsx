@@ -1,6 +1,9 @@
+'use client'
+
 import Image from 'next/image'
 import { MapPin, Star } from 'lucide-react'
 import { Kanit } from 'next/font/google'
+import { useRouter } from 'next/navigation'
 import ActivityBox from './ActivityBox'
 import PrimaryButton from './PrimaryButton'
 import { isBase64Image } from '@/lib/imageUtils'
@@ -8,6 +11,7 @@ import { isBase64Image } from '@/lib/imageUtils'
 const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] })
 
 type Props = {
+    id: string | number // เพิ่ม id prop สำหรับ navigation
     Name: string
     Age: number
     Rating: number
@@ -24,6 +28,7 @@ type Props = {
 }
 
 export default function Card({
+    id,
     Name,
     Age,
     Rating,
@@ -38,8 +43,13 @@ export default function Card({
     buttonTitle,
     Categories = [], // เพิ่ม Categories prop พร้อม default value
 }: Props) {
+    const router = useRouter()
     const priceHr = PriceHr.toLocaleString('th-TH')
     const priceD = PriceD.toLocaleString('th-TH')
+
+    const handleViewProfile = () => {
+        router.push(`/services/${id}`)
+    }
 
     return (
         <div
@@ -112,7 +122,10 @@ export default function Card({
                             ฿ {priceD} / วัน
                         </div>
                     </div>
-                    <PrimaryButton title={buttonTitle} />
+                    <PrimaryButton
+                        title={buttonTitle}
+                        onClick={handleViewProfile}
+                    />
                 </div>
 
                 <hr className="border-0 border-t border-t-[#E1E7F4]/60" />
