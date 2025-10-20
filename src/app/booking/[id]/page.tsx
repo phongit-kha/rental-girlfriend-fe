@@ -94,7 +94,7 @@ export default function BookingPage() {
     }
 
     const calculateDeposit = () => {
-        return Math.floor(calculateTotal() * 0.5)
+        return calculateTotal() // 100% payment instead of 50% deposit
     }
 
     const validateForm = () => {
@@ -152,34 +152,24 @@ export default function BookingPage() {
             const totalAmount = calculateTotal()
             const depositAmount = calculateDeposit()
 
-            // Create booking in localStorage
-            const booking = createBooking({
-                customerId: user.id,
-                providerId: provider.id,
-                serviceId: service.id,
-                serviceName: service.name,
-                date: bookingData.date,
-                startTime: bookingData.startTime,
-                endTime:
-                    bookingData.serviceType === 'daily'
-                        ? '23:59'
-                        : bookingData.endTime,
-                totalHours:
-                    bookingData.serviceType === 'daily'
-                        ? 8
-                        : bookingData.duration,
+            // Store booking data in sessionStorage for payment page
+            const bookingDataForPayment = {
+                ...bookingData,
                 totalAmount,
                 depositAmount,
-                status: 'pending',
-                paymentStatus: 'pending',
-                specialRequests: bookingData.specialRequests,
-            })
+                serviceName: service.name,
+            }
 
-            toast.success('สร้างการจองเรียบร้อยแล้ว!')
+            sessionStorage.setItem(
+                `bookingData_${service.id}`,
+                JSON.stringify(bookingDataForPayment)
+            )
+
+            toast.success('ข้อมูลการจองพร้อมแล้ว!')
 
             // Navigate to payment page
             setTimeout(() => {
-                router.push(`/payments/${booking.id}`)
+                router.push(`/payments/${service.id}`)
             }, 1000)
         } catch (error) {
             console.error('Booking error:', error)
@@ -490,7 +480,7 @@ export default function BookingPage() {
                                         </span>
                                     </div>
                                     <div className="mt-1 flex justify-between text-sm text-gray-600">
-                                        <span>เงินมัดจำ (50%)</span>
+                                        <span>ชำระเต็มจำนวน</span>
                                         <span>
                                             ฿
                                             {calculateDeposit().toLocaleString()}

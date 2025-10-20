@@ -16,6 +16,7 @@ import {
     getUsers,
     getBookingsByProvider,
     updateBooking,
+    cancelBookingWithRefund,
     initializeSampleData,
     type User as UserType,
     type Booking,
@@ -154,20 +155,29 @@ const ProviderBookings: React.FC = () => {
     }
 
     const handleRejectBooking = (bookingId: string) => {
+        const booking = bookings.find((b) => b.id === bookingId)
+        if (!booking) return
+
         toast(
             (t) => (
                 <div className="flex flex-col gap-3">
                     <p className="font-medium text-gray-900">
                         คุณต้องการปฏิเสธการจองนี้หรือไม่?
                     </p>
+                    <p className="text-sm text-gray-600">
+                        การปฏิเสธโดยผู้ให้บริการ: คืนเงิน 100% (฿
+                        {booking.totalAmount.toLocaleString()}) ให้ลูกค้า
+                    </p>
                     <div className="flex gap-2">
                         <button
                             onClick={() => {
                                 try {
-                                    // Update booking status in localStorage
-                                    updateBooking(bookingId, {
-                                        status: 'cancelled',
-                                    })
+                                    // Cancel booking with full refund to customer
+                                    cancelBookingWithRefund(
+                                        bookingId,
+                                        'provider',
+                                        'ปฏิเสธโดยผู้ให้บริการ'
+                                    )
 
                                     // Update local state
                                     setBookings((prev) =>
@@ -176,24 +186,32 @@ const ProviderBookings: React.FC = () => {
                                                 ? {
                                                       ...booking,
                                                       status: 'cancelled' as const,
+                                                      cancelledBy:
+                                                          'provider' as const,
+                                                      paymentStatus:
+                                                          'refunded' as const,
                                                   }
                                                 : booking
                                         )
                                     )
                                     toast.dismiss(t.id)
-                                    toast.error('ปฏิเสธการจองเรียบร้อยแล้ว', {
-                                        duration: 3000,
-                                    })
-                                } catch {
+                                    toast.success(
+                                        'ปฏิเสธการจองเรียบร้อยแล้ว เงินจะถูกคืนให้ลูกค้า 100%',
+                                        {
+                                            duration: 4000,
+                                        }
+                                    )
+                                } catch (error: any) {
                                     toast.dismiss(t.id)
                                     toast.error(
-                                        'เกิดข้อผิดพลาดในการปฏิเสธการจอง'
+                                        error.message ||
+                                            'เกิดข้อผิดพลาดในการปฏิเสธการจอง'
                                     )
                                 }
                             }}
                             className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
                         >
-                            ปฏิเสธ
+                            ยืนยันปฏิเสธ
                         </button>
                         <button
                             onClick={() => toast.dismiss(t.id)}
@@ -591,9 +609,7 @@ const ProviderBookings: React.FC = () => {
                                             ฿
                                             {booking.totalAmount.toLocaleString()}
                                             <span className="ml-2 text-sm font-normal text-gray-500">
-                                                (มัดจำ ฿
-                                                {booking.depositAmount.toLocaleString()}
-                                                )
+                                                (ลูกค้าชำระแล้ว 100%)
                                             </span>
                                         </div>
 

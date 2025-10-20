@@ -55,8 +55,10 @@ export interface Booking {
     totalAmount: number
     depositAmount: number
     status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
-    paymentStatus: 'pending' | 'paid' | 'refunded'
+    paymentStatus: 'pending' | 'paid' | 'refunded' | 'partially_refunded'
     specialRequests?: string
+    cancelledBy?: 'customer' | 'provider'
+    refundAmount?: number
     createdAt: string
     updatedAt: string
 }
@@ -68,10 +70,18 @@ export interface Payment {
     providerId: string
     amount: number
     paymentMethod: 'credit_card' | 'promptpay' | 'bank_transfer'
-    status: 'pending' | 'completed' | 'failed' | 'refunded'
+    status:
+        | 'pending'
+        | 'completed'
+        | 'failed'
+        | 'refunded'
+        | 'partially_refunded'
     transactionId?: string
+    refundAmount?: number
+    refundReason?: string
     createdAt: string
     completedAt?: string
+    refundedAt?: string
 }
 
 export interface Transaction {
@@ -764,6 +774,148 @@ export const completeBookingPayment = (bookingId: string): void => {
         bookingId: booking.id,
         status: 'completed',
     })
+}
+
+// Process booking cancellation and handle refunds
+export const cancelBookingWithRefund = (
+    bookingId: string,
+    cancelledBy: 'customer' | 'provider',
+    reason?: string
+): void => {
+    const booking = getBookingById(bookingId)
+    if (!booking) {
+        throw new Error('ไม่พบการจองที่ต้องการ')
+    }
+
+    if (booking.status === 'cancelled') {
+        throw new Error('การจองนี้ถูกยกเลิกแล้ว')
+    }
+
+    if (booking.paymentStatus !== 'paid') {
+        throw new Error('ไม่สามารถยกเลิกการจองที่ยังไม่ได้ชำระเงินได้')
+    }
+
+    let refundToCustomer = 0
+    let refundToProvider = 0
+    let paymentStatus: 'refunded' | 'partially_refunded' = 'refunded'
+
+    if (cancelledBy === 'customer') {
+        // Customer cancellation: 50% to customer, 50% to provider
+        refundToCustomer = Math.floor(booking.totalAmount * 0.5)
+        refundToProvider = booking.totalAmount - refundToCustomer
+        paymentStatus = 'partially_refunded'
+    } else {
+        // Provider cancellation: 100% to customer
+        refundToCustomer = booking.totalAmount
+        refundToProvider = 0
+        paymentStatus = 'refunded'
+    }
+
+    // Update booking
+    updateBooking(bookingId, {
+        status: 'cancelled',
+        paymentStatus,
+        cancelledBy,
+        refundAmount: refundToCustomer,
+    })
+
+    // Update payment record
+    const payments = getPaymentsByBooking(bookingId)
+    if (payments.length > 0) {
+        const payment = payments[0]!
+        updatePayment(payment.id, {
+            status: paymentStatus,
+            refundAmount: refundToCustomer,
+            refundReason:
+                reason ||
+                `ยกเลิกโดย${cancelledBy === 'customer' ? 'ลูกค้า' : 'ผู้ให้บริการ'}`,
+            refundedAt: new Date().toISOString(),
+        })
+    }
+
+    // Process refunds
+    if (refundToCustomer > 0) {
+        // Refund to customer
+        const customerBalance = getUserBalance(booking.customerId)
+        updateUserBalance(booking.customerId, {
+            balance: customerBalance.balance + refundToCustomer,
+        })
+
+        createTransaction({
+            userId: booking.customerId,
+            type: 'refund',
+            amount: refundToCustomer,
+            description: `คืนเงิน - ${booking.serviceName} (ยกเลิกโดย${cancelledBy === 'customer' ? 'ลูกค้า' : 'ผู้ให้บริการ'})`,
+            bookingId: booking.id,
+            status: 'completed',
+        })
+    }
+
+    if (refundToProvider > 0) {
+        // Payment to provider (in case of customer cancellation)
+        const providerBalance = getUserBalance(booking.providerId)
+        const platformCommission = Math.floor(refundToProvider * 0.1)
+        const providerEarning = refundToProvider - platformCommission
+
+        updateUserBalance(booking.providerId, {
+            balance: providerBalance.balance + providerEarning,
+            totalEarnings: providerBalance.totalEarnings + providerEarning,
+        })
+
+        createTransaction({
+            userId: booking.providerId,
+            type: 'earning',
+            amount: providerEarning,
+            description: `รายได้จากการยกเลิกของลูกค้า - ${booking.serviceName}`,
+            bookingId: booking.id,
+            status: 'completed',
+        })
+
+        if (platformCommission > 0) {
+            createTransaction({
+                userId: booking.providerId,
+                type: 'commission',
+                amount: -platformCommission,
+                description: `ค่าคอมมิชชั่นแพลตฟอร์ม (10%) - ${booking.serviceName}`,
+                bookingId: booking.id,
+                status: 'completed',
+            })
+        }
+    }
+}
+
+// Create booking after successful payment
+export const createBookingAfterPayment = (
+    bookingData: Omit<
+        Booking,
+        'id' | 'createdAt' | 'updatedAt' | 'paymentStatus'
+    >,
+    paymentData: Omit<Payment, 'id' | 'createdAt' | 'bookingId'>
+): { booking: Booking; payment: Payment } => {
+    // Create booking with paid status
+    const booking = createBooking({
+        ...bookingData,
+        paymentStatus: 'paid',
+    })
+
+    // Create payment record
+    const payment = createPayment({
+        ...paymentData,
+        bookingId: booking.id,
+    })
+
+    // Create transaction record for customer
+    createTransaction({
+        userId: booking.customerId,
+        type: 'payment',
+        amount: -booking.totalAmount,
+        description: `ชำระเงิน - ${booking.serviceName}`,
+        bookingId: booking.id,
+        paymentId: payment.id,
+        status: 'completed',
+    })
+
+    return { booking, payment }
 }
 
 // Initialize sample data

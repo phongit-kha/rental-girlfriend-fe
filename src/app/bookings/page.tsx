@@ -13,7 +13,7 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import {
     getUsers,
     getBookingsByCustomer,
-    updateBooking,
+    cancelBookingWithRefund,
     initializeSampleData,
     type User as UserType,
     type Booking,
@@ -108,20 +108,30 @@ const Bookings: React.FC = () => {
     })
 
     const handleCancelBooking = (bookingId: string) => {
+        const booking = bookings.find((b) => b.id === bookingId)
+        if (!booking) return
+
         toast(
             (t) => (
                 <div className="flex flex-col gap-3">
                     <p className="font-medium text-gray-900">
                         คุณแน่ใจหรือไม่ที่จะยกเลิกการจองนี้?
                     </p>
+                    <p className="text-sm text-gray-600">
+                        การยกเลิกโดยลูกค้า: คืนเงิน 50% (฿
+                        {Math.floor(booking.totalAmount * 0.5).toLocaleString()}
+                        ) และจ่าย 50% ให้ผู้ให้บริการ
+                    </p>
                     <div className="flex gap-2">
                         <button
                             onClick={() => {
                                 try {
-                                    // Update booking status in localStorage
-                                    updateBooking(bookingId, {
-                                        status: 'cancelled',
-                                    })
+                                    // Cancel booking with refund logic
+                                    cancelBookingWithRefund(
+                                        bookingId,
+                                        'customer',
+                                        'ยกเลิกโดยลูกค้า'
+                                    )
 
                                     // Update local state
                                     setBookings((prev) =>
@@ -130,24 +140,32 @@ const Bookings: React.FC = () => {
                                                 ? {
                                                       ...booking,
                                                       status: 'cancelled' as const,
+                                                      cancelledBy:
+                                                          'customer' as const,
+                                                      paymentStatus:
+                                                          'partially_refunded' as const,
                                                   }
                                                 : booking
                                         )
                                     )
                                     toast.dismiss(t.id)
-                                    toast.success('ยกเลิกการจองเรียบร้อยแล้ว', {
-                                        duration: 3000,
-                                    })
-                                } catch {
+                                    toast.success(
+                                        'ยกเลิกการจองเรียบร้อยแล้ว เงินจะถูกคืนให้ 50%',
+                                        {
+                                            duration: 4000,
+                                        }
+                                    )
+                                } catch (error: any) {
                                     toast.dismiss(t.id)
                                     toast.error(
-                                        'เกิดข้อผิดพลาดในการยกเลิกการจอง'
+                                        error.message ||
+                                            'เกิดข้อผิดพลาดในการยกเลิกการจอง'
                                     )
                                 }
                             }}
                             className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
                         >
-                            ยืนยัน
+                            ยืนยันยกเลิก
                         </button>
                         <button
                             onClick={() => toast.dismiss(t.id)}
@@ -378,9 +396,7 @@ const Bookings: React.FC = () => {
                                             ฿
                                             {booking.totalAmount.toLocaleString()}
                                             <span className="ml-2 text-sm font-normal text-gray-500">
-                                                (มัดจำ ฿
-                                                {booking.depositAmount.toLocaleString()}
-                                                )
+                                                (ชำระแล้ว 100%)
                                             </span>
                                         </div>
 

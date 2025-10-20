@@ -6,14 +6,11 @@ import { CreditCard, CheckCircle, ArrowLeft } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuthContext } from '@/contexts/AuthContext'
 import {
-    getBookingById,
+    getServices,
     getUsers,
-    updateBooking,
-    createPayment,
-    createTransaction,
-    deductFromUserBalance,
+    createBookingAfterPayment,
     initializeSampleData,
-    type Booking,
+    type Service,
     type User,
 } from '@/lib/localStorage'
 
@@ -22,8 +19,9 @@ export default function PaymentPage() {
     const router = useRouter()
     const { user, isAuthenticated } = useAuthContext()
 
-    const [booking, setBooking] = useState<Booking | null>(null)
+    const [service, setService] = useState<Service | null>(null)
     const [provider, setProvider] = useState<User | null>(null)
+    const [bookingData, setBookingData] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
     const [paymentMethod, setPaymentMethod] = useState('credit_card')
@@ -42,42 +40,47 @@ export default function PaymentPage() {
 
         if (!user || user.type !== 'customer') {
             toast.error('เฉพาะลูกค้าเท่านั้นที่สามารถชำระเงินได้')
-            router.push('/bookings')
+            router.push('/services')
             return
         }
 
         if (!id) {
-            router.push('/bookings')
+            router.push('/services')
             return
         }
 
-        // Load booking data
-        const foundBooking = getBookingById(String(id))
-
-        if (!foundBooking) {
-            toast.error('ไม่พบการจองที่ต้องการ')
-            router.push('/bookings')
+        // Get booking data from sessionStorage (passed from booking page)
+        const storedBookingData = sessionStorage.getItem(`bookingData_${id}`)
+        if (!storedBookingData) {
+            toast.error('ไม่พบข้อมูลการจอง กรุณาทำการจองใหม่')
+            router.push(`/booking/${id}`)
             return
         }
 
-        // Check if this booking belongs to the current user
-        if (foundBooking.customerId !== user.id) {
-            toast.error('คุณไม่มีสิทธิ์เข้าถึงการจองนี้')
-            router.push('/bookings')
+        const parsedBookingData = JSON.parse(storedBookingData)
+        setBookingData(parsedBookingData)
+
+        // Load service data
+        const services = getServices()
+        const foundService = services.find((s) => s.id === String(id))
+
+        if (!foundService) {
+            toast.error('ไม่พบบริการที่ต้องการ')
+            router.push('/services')
             return
         }
 
-        setBooking(foundBooking)
+        setService(foundService)
 
         // Load provider data
         const users = getUsers()
         const foundProvider = users.find(
-            (u) => u.id === foundBooking.providerId
+            (u) => u.id === foundService.providerId
         )
 
         if (!foundProvider) {
             toast.error('ไม่พบผู้ให้บริการ')
-            router.push('/bookings')
+            router.push('/services')
             return
         }
 
@@ -86,7 +89,7 @@ export default function PaymentPage() {
     }, [id, router, isAuthenticated, user])
 
     const handlePayment = async () => {
-        if (!booking || !provider || !user) return
+        if (!service || !provider || !user || !bookingData) return
 
         setIsProcessing(true)
 
@@ -99,46 +102,50 @@ export default function PaymentPage() {
             // Simulate payment processing delay
             await new Promise((resolve) => setTimeout(resolve, 2000))
 
-            // Create payment record
-            const payment = createPayment({
-                bookingId: booking.id,
-                customerId: user.id,
-                providerId: provider.id,
-                amount: booking.depositAmount,
-                paymentMethod: paymentMethod as
-                    | 'credit_card'
-                    | 'promptpay'
-                    | 'bank_transfer',
-                status: 'completed',
-                transactionId: `txn_${Date.now()}`,
-                completedAt: new Date().toISOString(),
-            })
+            // Calculate total amount (100% payment)
+            const totalAmount =
+                bookingData.serviceType === 'daily'
+                    ? service.priceDay
+                    : service.priceHour * bookingData.duration
 
-            // Update booking payment status
-            updateBooking(booking.id, {
-                paymentStatus: 'paid',
-            })
+            // Create booking and payment after successful payment
+            const { booking } = createBookingAfterPayment(
+                {
+                    customerId: user.id,
+                    providerId: provider.id,
+                    serviceId: service.id,
+                    serviceName: service.name,
+                    date: bookingData.date,
+                    startTime: bookingData.startTime,
+                    endTime:
+                        bookingData.serviceType === 'daily'
+                            ? '23:59'
+                            : bookingData.endTime,
+                    totalHours:
+                        bookingData.serviceType === 'daily'
+                            ? 8
+                            : bookingData.duration,
+                    totalAmount,
+                    depositAmount: totalAmount, // 100% payment
+                    status: 'pending',
+                    specialRequests: bookingData.specialRequests,
+                },
+                {
+                    customerId: user.id,
+                    providerId: provider.id,
+                    amount: totalAmount,
+                    paymentMethod: paymentMethod as
+                        | 'credit_card'
+                        | 'promptpay'
+                        | 'bank_transfer',
+                    status: 'completed',
+                    transactionId: `txn_${Date.now()}`,
+                    completedAt: new Date().toISOString(),
+                }
+            )
 
-            // Create transaction record for customer
-            createTransaction({
-                userId: user.id,
-                type: 'payment',
-                amount: -booking.depositAmount,
-                description: `ชำระเงินมัดจำ - ${booking.serviceName}`,
-                bookingId: booking.id,
-                paymentId: payment.id,
-                status: 'completed',
-            })
-
-            // Try to deduct from user balance (optional - if they have balance)
-            try {
-                deductFromUserBalance(user.id, booking.depositAmount)
-            } catch {
-                // If balance is insufficient, that's okay - payment was processed via other method
-                console.log(
-                    'Balance insufficient, payment processed via payment method'
-                )
-            }
+            // Clear booking data from sessionStorage
+            sessionStorage.removeItem(`bookingData_${id}`)
 
             setPaymentComplete(true)
             setIsProcessing(false)
@@ -152,7 +159,7 @@ export default function PaymentPage() {
             // Additional success notification
             setTimeout(() => {
                 toast.success(
-                    'คำขอของคุณถูกส่งไปแล้ว รอผู้ให้บริการตอบกลับในเร็วๆ นี้',
+                    'การจองของคุณถูกส่งไปแล้ว รอผู้ให้บริการตอบกลับในเร็วๆ นี้',
                     {
                         duration: 5000,
                     }
@@ -178,23 +185,29 @@ export default function PaymentPage() {
         )
     }
 
-    if (!booking || !provider) {
+    if (!service || !provider || !bookingData) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="text-center">
                     <h2 className="mb-4 text-2xl font-bold text-gray-900">
-                        ไม่พบการจองที่ต้องการ
+                        ไม่พบข้อมูลการจองที่ต้องการ
                     </h2>
                     <button
-                        onClick={() => router.push('/bookings')}
+                        onClick={() => router.push('/services')}
                         className="rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-3 font-semibold text-white transition-all hover:from-pink-600 hover:to-rose-600"
                     >
-                        กลับไปหน้าการจอง
+                        กลับไปหน้าบริการ
                     </button>
                 </div>
             </div>
         )
     }
+
+    // Calculate amounts for display
+    const totalAmount =
+        bookingData.serviceType === 'daily'
+            ? service.priceDay
+            : service.priceHour * bookingData.duration
 
     if (paymentComplete) {
         return (
@@ -246,7 +259,7 @@ export default function PaymentPage() {
                             ชำระเงิน
                         </h1>
                         <p className="text-gray-600">
-                            ชำระเงินมัดจำเพื่อยืนยันการจอง
+                            ชำระเงินเต็มจำนวนเพื่อยืนยันการจอง
                         </p>
                     </div>
                 </div>
@@ -423,14 +436,17 @@ export default function PaymentPage() {
                                     </span>
                                     <span className="font-medium">
                                         {new Date(
-                                            booking.date
+                                            bookingData.date
                                         ).toLocaleDateString('th-TH')}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">เวลา</span>
                                     <span className="font-medium">
-                                        {booking.startTime} - {booking.endTime}
+                                        {bookingData.startTime} -{' '}
+                                        {bookingData.serviceType === 'daily'
+                                            ? '23:59'
+                                            : bookingData.endTime}
                                     </span>
                                 </div>
                                 <div className="flex justify-between">
@@ -438,7 +454,10 @@ export default function PaymentPage() {
                                         ระยะเวลา
                                     </span>
                                     <span className="font-medium">
-                                        {booking.totalHours} ชั่วโมง
+                                        {bookingData.serviceType === 'daily'
+                                            ? '8'
+                                            : bookingData.duration}{' '}
+                                        ชั่วโมง
                                     </span>
                                 </div>
                             </div>
@@ -455,32 +474,20 @@ export default function PaymentPage() {
                                         ค่าบริการรวม
                                     </span>
                                     <span className="font-medium">
-                                        ฿{booking.totalAmount.toLocaleString()}
+                                        ฿{totalAmount.toLocaleString()}
                                     </span>
                                 </div>
                                 <div className="flex justify-between text-pink-600">
-                                    <span>เงินมัดจำ (50%)</span>
+                                    <span>ชำระเต็มจำนวน (100%)</span>
                                     <span className="font-semibold">
-                                        ฿
-                                        {booking.depositAmount.toLocaleString()}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between text-sm text-gray-500">
-                                    <span>ค่าบริการคงเหลือ</span>
-                                    <span>
-                                        ฿
-                                        {(
-                                            booking.totalAmount -
-                                            booking.depositAmount
-                                        ).toLocaleString()}
+                                        ฿{totalAmount.toLocaleString()}
                                     </span>
                                 </div>
                                 <div className="border-t pt-3">
                                     <div className="flex justify-between text-lg font-bold">
                                         <span>ยอดที่ต้องชำระ</span>
                                         <span className="text-pink-600">
-                                            ฿
-                                            {booking.depositAmount.toLocaleString()}
+                                            ฿{totalAmount.toLocaleString()}
                                         </span>
                                     </div>
                                 </div>
@@ -502,8 +509,7 @@ export default function PaymentPage() {
                                 <>
                                     <CreditCard className="h-5 w-5" />
                                     <span>
-                                        ชำระเงิน ฿
-                                        {booking.depositAmount.toLocaleString()}
+                                        ชำระเงิน ฿{totalAmount.toLocaleString()}
                                     </span>
                                 </>
                             )}
