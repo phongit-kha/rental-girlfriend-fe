@@ -13,6 +13,7 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import { getUsers } from '@/lib/localStorage'
 import type { User as UserType } from '@/lib/localStorage'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 
 // Mock booking interface
 interface Booking {
@@ -192,16 +193,48 @@ const Bookings: React.FC = () => {
     })
 
     const handleCancelBooking = (bookingId: string) => {
-        if (confirm('คุณแน่ใจหรือไม่ที่จะยกเลิกการจองนี้?')) {
-            // Mock cancel booking
-            setBookings((prev) =>
-                prev.map((booking) =>
-                    booking.id === bookingId
-                        ? { ...booking, status: 'cancelled' as const }
-                        : booking
-                )
-            )
-        }
+        toast(
+            (t) => (
+                <div className="flex flex-col gap-3">
+                    <p className="font-medium text-gray-900">
+                        คุณแน่ใจหรือไม่ที่จะยกเลิกการจองนี้?
+                    </p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                // Mock cancel booking
+                                setBookings((prev) =>
+                                    prev.map((booking) =>
+                                        booking.id === bookingId
+                                            ? {
+                                                  ...booking,
+                                                  status: 'cancelled' as const,
+                                              }
+                                            : booking
+                                    )
+                                )
+                                toast.dismiss(t.id)
+                                toast.success('ยกเลิกการจองเรียบร้อยแล้ว', {
+                                    duration: 3000,
+                                })
+                            }}
+                            className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
+                        >
+                            ยืนยัน
+                        </button>
+                        <button
+                            onClick={() => toast.dismiss(t.id)}
+                            className="rounded bg-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-400"
+                        >
+                            ยกเลิก
+                        </button>
+                    </div>
+                </div>
+            ),
+            {
+                duration: Infinity,
+            }
+        )
     }
 
     const handleConfirmBooking = (bookingId: string) => {
@@ -213,6 +246,25 @@ const Bookings: React.FC = () => {
                     : booking
             )
         )
+        toast.success('ยืนยันการจองเรียบร้อยแล้ว', {
+            duration: 3000,
+        })
+    }
+
+    const handleReviewBooking = (bookingId: string) => {
+        toast.success('เปิดหน้าให้รีวิว', {
+            duration: 2000,
+        })
+        // Here you would navigate to review page
+        // router.push(`/review/${bookingId}`)
+    }
+
+    const handleSendMessage = (userId: string) => {
+        toast.success('เปิดหน้าแชท', {
+            duration: 2000,
+        })
+        // Here you would navigate to chat page
+        // router.push(`/chat/${userId}`)
     }
 
     if (!isAuthenticated) {
@@ -432,7 +484,14 @@ const Bookings: React.FC = () => {
                                         </div>
 
                                         <div className="flex items-center space-x-3">
-                                            <button className="flex items-center space-x-2 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50">
+                                            <button
+                                                onClick={() =>
+                                                    handleSendMessage(
+                                                        otherUserId
+                                                    )
+                                                }
+                                                className="flex items-center space-x-2 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+                                            >
                                                 <MessageCircle className="h-4 w-4" />
                                                 <span>ส่งข้อความ</span>
                                             </button>
@@ -478,7 +537,14 @@ const Bookings: React.FC = () => {
 
                                             {booking.status === 'completed' &&
                                                 user?.type === 'customer' && (
-                                                    <button className="flex items-center space-x-2 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 px-4 py-2 text-white transition-all hover:from-pink-600 hover:to-rose-600">
+                                                    <button
+                                                        onClick={() =>
+                                                            handleReviewBooking(
+                                                                booking.id
+                                                            )
+                                                        }
+                                                        className="flex items-center space-x-2 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 px-4 py-2 text-white transition-all hover:from-pink-600 hover:to-rose-600"
+                                                    >
                                                         <Star className="h-4 w-4" />
                                                         <span>ให้รีวิว</span>
                                                     </button>

@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { Calendar, Clock, MessageSquare, AlertCircle } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 export default function BookingPage() {
     const { id } = useParams()
@@ -134,7 +135,7 @@ export default function BookingPage() {
 
             // Simulate success
             setTimeout(() => {
-                alert('การจองสำเร็จ! กำลังไปยังหน้าชำระเงิน')
+                // Show navigation toast
                 router.push(`/payments/${booking.id}`)
             }, 1000)
         } catch (error) {

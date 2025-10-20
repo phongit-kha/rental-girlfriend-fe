@@ -15,6 +15,7 @@ import { useAuthContext } from '@/contexts/AuthContext'
 import { getUsers } from '@/lib/localStorage'
 import type { User as UserType } from '@/lib/localStorage'
 import Link from 'next/link'
+import toast from 'react-hot-toast'
 
 // Mock booking interface
 interface Booking {
@@ -176,41 +177,146 @@ const ProviderBookings: React.FC = () => {
     )
 
     const handleConfirmBooking = (bookingId: string) => {
-        if (confirm('คุณต้องการยืนยันการจองนี้หรือไม่?')) {
-            setBookings((prev) =>
-                prev.map((booking) =>
-                    booking.id === bookingId
-                        ? { ...booking, status: 'confirmed' as const }
-                        : booking
-                )
-            )
-        }
+        toast(
+            (t) => (
+                <div className="flex flex-col gap-3">
+                    <p className="font-medium text-gray-900">
+                        คุณต้องการยืนยันการจองนี้หรือไม่?
+                    </p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                setBookings((prev) =>
+                                    prev.map((booking) =>
+                                        booking.id === bookingId
+                                            ? {
+                                                  ...booking,
+                                                  status: 'confirmed' as const,
+                                              }
+                                            : booking
+                                    )
+                                )
+                                toast.dismiss(t.id)
+                                toast.success('ยืนยันการจองเรียบร้อยแล้ว', {
+                                    duration: 3000,
+                                })
+                            }}
+                            className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
+                        >
+                            ยืนยัน
+                        </button>
+                        <button
+                            onClick={() => toast.dismiss(t.id)}
+                            className="rounded bg-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-400"
+                        >
+                            ยกเลิก
+                        </button>
+                    </div>
+                </div>
+            ),
+            {
+                duration: Infinity,
+            }
+        )
     }
 
     const handleRejectBooking = (bookingId: string) => {
-        if (confirm('คุณต้องการปฏิเสธการจองนี้หรือไม่?')) {
-            setBookings((prev) =>
-                prev.map((booking) =>
-                    booking.id === bookingId
-                        ? { ...booking, status: 'cancelled' as const }
-                        : booking
-                )
-            )
-        }
+        toast(
+            (t) => (
+                <div className="flex flex-col gap-3">
+                    <p className="font-medium text-gray-900">
+                        คุณต้องการปฏิเสธการจองนี้หรือไม่?
+                    </p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                setBookings((prev) =>
+                                    prev.map((booking) =>
+                                        booking.id === bookingId
+                                            ? {
+                                                  ...booking,
+                                                  status: 'cancelled' as const,
+                                              }
+                                            : booking
+                                    )
+                                )
+                                toast.dismiss(t.id)
+                                toast.error('ปฏิเสธการจองเรียบร้อยแล้ว', {
+                                    duration: 3000,
+                                })
+                            }}
+                            className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
+                        >
+                            ปฏิเสธ
+                        </button>
+                        <button
+                            onClick={() => toast.dismiss(t.id)}
+                            className="rounded bg-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-400"
+                        >
+                            ยกเลิก
+                        </button>
+                    </div>
+                </div>
+            ),
+            {
+                duration: Infinity,
+            }
+        )
     }
 
     const handleCompleteBooking = (bookingId: string) => {
-        if (
-            confirm('คุณต้องการทำเครื่องหมายว่าบริการนี้เสร็จสิ้นแล้วหรือไม่?')
-        ) {
-            setBookings((prev) =>
-                prev.map((booking) =>
-                    booking.id === bookingId
-                        ? { ...booking, status: 'completed' as const }
-                        : booking
-                )
-            )
-        }
+        toast(
+            (t) => (
+                <div className="flex flex-col gap-3">
+                    <p className="font-medium text-gray-900">
+                        คุณต้องการทำเครื่องหมายว่าบริการนี้เสร็จสิ้นแล้วหรือไม่?
+                    </p>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => {
+                                setBookings((prev) =>
+                                    prev.map((booking) =>
+                                        booking.id === bookingId
+                                            ? {
+                                                  ...booking,
+                                                  status: 'completed' as const,
+                                              }
+                                            : booking
+                                    )
+                                )
+                                toast.dismiss(t.id)
+                                toast.success(
+                                    'ทำเครื่องหมายบริการเสร็จสิ้นแล้ว! 🎉',
+                                    {
+                                        duration: 4000,
+                                    }
+                                )
+                            }}
+                            className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+                        >
+                            ยืนยัน
+                        </button>
+                        <button
+                            onClick={() => toast.dismiss(t.id)}
+                            className="rounded bg-gray-300 px-3 py-1 text-sm text-gray-700 hover:bg-gray-400"
+                        >
+                            ยกเลิก
+                        </button>
+                    </div>
+                </div>
+            ),
+            {
+                duration: Infinity,
+            }
+        )
+    }
+
+    const handleSendMessage = (customerId: string) => {
+        toast.success('เปิดหน้าแชท', {
+            duration: 2000,
+        })
+        // Here you would navigate to chat page
+        // router.push(`/chat/${customerId}`)
     }
 
     if (!isAuthenticated) {
@@ -533,7 +639,14 @@ const ProviderBookings: React.FC = () => {
                                         </div>
 
                                         <div className="flex items-center space-x-3">
-                                            <button className="flex items-center space-x-2 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50">
+                                            <button
+                                                onClick={() =>
+                                                    handleSendMessage(
+                                                        booking.customerId
+                                                    )
+                                                }
+                                                className="flex items-center space-x-2 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+                                            >
                                                 <MessageCircle className="h-4 w-4" />
                                                 <span>ส่งข้อความ</span>
                                             </button>

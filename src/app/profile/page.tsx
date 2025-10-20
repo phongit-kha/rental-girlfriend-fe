@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Kanit } from 'next/font/google'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { updateUser as updateUserInStorage } from '@/lib/localStorage'
+import toast from 'react-hot-toast'
 
 import ProfileBanner from '@/components/profile/ProfileBanner'
 import PersonalInfo from '@/components/profile/PersonalInfo'
@@ -127,16 +128,24 @@ export default function ProfilePage() {
             setDraft(newUserData)
             setEditProfile(false) // ปิด edit mode หลังบันทึกสำเร็จ
 
+            // Show success toast
+            toast.success('อัปเดตข้อมูลโปรไฟล์สำเร็จ! ✅', {
+                duration: 3000,
+            })
+
             // Reset the updating flag after a short delay to allow state to settle
             setTimeout(() => {
                 setIsUpdating(false)
             }, 100)
         } catch (error) {
             setIsUpdating(false) // Reset flag on error
-            alert(
+            toast.error(
                 error instanceof Error
                     ? error.message
-                    : 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล'
+                    : 'เกิดข้อผิดพลาดในการอัปเดตข้อมูล',
+                {
+                    duration: 4000,
+                }
             )
         }
     }
@@ -229,11 +238,19 @@ export default function ProfilePage() {
                                 setDraft(newUserData)
                                 setChangeProfile(false)
                                 setTempImg(null)
+
+                                // Show success toast
+                                toast.success('อัปเดตรูปโปรไฟล์สำเร็จ! 📸', {
+                                    duration: 3000,
+                                })
                             } catch (error) {
-                                alert(
+                                toast.error(
                                     error instanceof Error
                                         ? error.message
-                                        : 'เกิดข้อผิดพลาดในการอัปเดตรูปโปรไฟล์'
+                                        : 'เกิดข้อผิดพลาดในการอัปเดตรูปโปรไฟล์',
+                                    {
+                                        duration: 4000,
+                                    }
                                 )
                             }
                         }

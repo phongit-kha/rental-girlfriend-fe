@@ -9,6 +9,7 @@ import {
     AlertCircle,
     ArrowLeft,
 } from 'lucide-react'
+import toast from 'react-hot-toast'
 
 export default function PaymentPage() {
     const { id } = useParams()
@@ -53,10 +54,31 @@ export default function PaymentPage() {
     const handlePayment = async () => {
         setIsProcessing(true)
 
+        // Show processing toast
+        const processingToast = toast.loading('กำลังดำเนินการชำระเงิน...', {
+            duration: Infinity,
+        })
+
         // Simulate payment processing
         setTimeout(() => {
             setPaymentComplete(true)
             setIsProcessing(false)
+
+            // Dismiss processing toast and show success
+            toast.dismiss(processingToast)
+            toast.success('ชำระเงินสำเร็จ! 🎉', {
+                duration: 4000,
+            })
+
+            // Additional success notification
+            setTimeout(() => {
+                toast.success(
+                    'คำขอของคุณถูกส่งไปแล้ว รอผู้ให้บริการตอบกลับในเร็วๆ นี้',
+                    {
+                        duration: 5000,
+                    }
+                )
+            }, 1000)
         }, 3000)
     }
 
@@ -72,21 +94,20 @@ export default function PaymentPage() {
                             ชำระเงินสำเร็จ!
                         </h2>
                         <p className="mb-6 text-gray-600">
-                            การจองของคุณได้รับการยืนยันแล้ว
-                            ผู้ให้บริการจะติดต่อกลับในเร็วๆ นี้
+                            คำขอของคุณถูกส่งไปแล้ว รอผู้ให้บริการตอบกลับในเร็วๆ
+                            นี้
                         </p>
                         <div className="space-y-3">
                             <button
-                                onClick={() => router.push('/services')}
+                                onClick={() => {
+                                    toast.success('กำลังไปหน้าสถานะการจอง', {
+                                        duration: 2000,
+                                    })
+                                    router.push('/bookings')
+                                }}
                                 className="w-full rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 py-3 font-semibold text-white transition-all hover:from-pink-600 hover:to-rose-600"
                             >
-                                กลับไปหน้าบริการ
-                            </button>
-                            <button
-                                onClick={() => router.push('/profile')}
-                                className="w-full rounded-xl border border-gray-300 py-3 font-semibold text-gray-700 transition-colors hover:bg-gray-50"
-                            >
-                                ดูโปรไฟล์ของฉัน
+                                ดูการจองของฉัน
                             </button>
                         </div>
                     </div>
