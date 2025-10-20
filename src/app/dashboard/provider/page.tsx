@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
     Wallet,
@@ -10,7 +10,6 @@ import {
     Minus,
     Filter,
     Calendar,
-    DollarSign,
     Users,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -48,24 +47,7 @@ export default function ProviderDashboard() {
     })
     const [isProcessingWithdrawal, setIsProcessingWithdrawal] = useState(false)
 
-    useEffect(() => {
-        initializeSampleData()
-
-        if (!isAuthenticated) {
-            router.push('/login')
-            return
-        }
-
-        if (!user || !isProvider) {
-            toast.error('เฉพาะผู้ให้บริการเท่านั้นที่สามารถเข้าถึงหน้านี้ได้')
-            router.push('/')
-            return
-        }
-
-        loadData()
-    }, [user, isAuthenticated, isProvider, router])
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         if (!user) return
 
         setLoading(true)
@@ -84,22 +66,35 @@ export default function ProviderDashboard() {
 
             const providerBookings = getBookingsByProvider(user.id)
             setBookings(providerBookings)
-        } catch (error) {
+        } catch {
             toast.error('ไม่สามารถโหลดข้อมูลได้')
         } finally {
             setLoading(false)
         }
-    }
+    }, [user])
+
+    useEffect(() => {
+        initializeSampleData()
+
+        if (!isAuthenticated) {
+            router.push('/login')
+            return
+        }
+
+        if (!user || !isProvider) {
+            toast.error('เฉพาะผู้ให้บริการเท่านั้นที่สามารถเข้าถึงหน้านี้ได้')
+            router.push('/')
+            return
+        }
+
+        void loadData()
+    }, [user, isAuthenticated, isProvider, router, loadData])
 
     const filteredTransactions = transactions.filter(
         (t) => filterType === 'all' || t.type === filterType
     )
 
     const completedBookings = bookings.filter((b) => b.status === 'completed')
-    const totalEarnings = completedBookings.reduce(
-        (sum, booking) => sum + booking.totalAmount,
-        0
-    )
     const thisMonthEarnings = completedBookings
         .filter((b) => {
             const bookingDate = new Date(b.createdAt)
@@ -140,7 +135,7 @@ export default function ProviderDashboard() {
             // Simulate API delay for withdrawal processing
             await new Promise((resolve) => setTimeout(resolve, 2500))
 
-            await processWithdrawal(
+            processWithdrawal(
                 user.id,
                 amount,
                 withdrawalForm.bankName,
@@ -157,10 +152,12 @@ export default function ProviderDashboard() {
                 accountNumber: '',
                 accountName: '',
             })
-            loadData()
-        } catch (error: any) {
+            void loadData()
+        } catch (error: unknown) {
             toast.dismiss(processingToast)
-            toast.error(error.message || 'เกิดข้อผิดพลาดในการถอนเงิน')
+            toast.error(
+                (error as Error).message ?? 'เกิดข้อผิดพลาดในการถอนเงิน'
+            )
         } finally {
             setIsProcessingWithdrawal(false)
         }
@@ -222,7 +219,7 @@ export default function ProviderDashboard() {
                             <div>
                                 <p className="text-pink-100">ยอดเงินคงเหลือ</p>
                                 <p className="text-3xl font-bold">
-                                    ฿{balance?.balance.toLocaleString() || '0'}
+                                    ฿{balance?.balance.toLocaleString() ?? '0'}
                                 </p>
                             </div>
                             <Wallet className="h-12 w-12 text-pink-200" />
@@ -237,7 +234,7 @@ export default function ProviderDashboard() {
                                 </p>
                                 <p className="text-2xl font-bold text-gray-900">
                                     ฿
-                                    {balance?.totalEarnings.toLocaleString() ||
+                                    {balance?.totalEarnings.toLocaleString() ??
                                         '0'}
                                 </p>
                             </div>
@@ -478,7 +475,7 @@ export default function ProviderDashboard() {
                                 className="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-pink-500 focus:ring-2 focus:ring-pink-500"
                                 placeholder="กรอกจำนวนเงิน (ขั้นต่ำ ฿100)"
                                 min="100"
-                                max={balance?.balance || 0}
+                                max={balance?.balance ?? 0}
                             />
                         </div>
                         <div className="mb-4">
@@ -489,7 +486,7 @@ export default function ProviderDashboard() {
                                 {suggestedAmounts
                                     .filter(
                                         (amount) =>
-                                            amount <= (balance?.balance || 0)
+                                            amount <= (balance?.balance ?? 0)
                                     )
                                     .map((amount) => (
                                         <button
@@ -510,7 +507,7 @@ export default function ProviderDashboard() {
                                         setWithdrawalForm((prev) => ({
                                             ...prev,
                                             amount: (
-                                                balance?.balance || 0
+                                                balance?.balance ?? 0
                                             ).toString(),
                                         }))
                                     }

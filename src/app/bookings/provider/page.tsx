@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import {
     Calendar,
     Clock,
@@ -17,6 +18,7 @@ import {
     getBookingsByProvider,
     updateBooking,
     cancelBookingWithRefund,
+    completeBookingPayment,
     initializeSampleData,
     type User as UserType,
     type Booking,
@@ -56,7 +58,7 @@ const ProviderBookings: React.FC = () => {
             })
 
             setCustomers(customerData)
-        } catch (error) {
+        } catch {
             toast.error('ไม่สามารถโหลดข้อมูลการจองได้')
         }
     }, [user])
@@ -66,7 +68,7 @@ const ProviderBookings: React.FC = () => {
         initializeSampleData()
 
         if (user && isAuthenticated && isProvider) {
-            loadBookings()
+            void loadBookings()
         }
     }, [user, isAuthenticated, isProvider, loadBookings])
 
@@ -240,10 +242,10 @@ const ProviderBookings: React.FC = () => {
                                             duration: 4000,
                                         }
                                     )
-                                } catch (error: any) {
+                                } catch (error: unknown) {
                                     toast.dismiss(processingToast)
                                     toast.error(
-                                        error.message ||
+                                        (error as Error).message ??
                                             'เกิดข้อผิดพลาดในการปฏิเสธการจอง'
                                     )
                                 }
@@ -293,10 +295,8 @@ const ProviderBookings: React.FC = () => {
                                         setTimeout(resolve, 1000)
                                     )
 
-                                    // Update booking status in localStorage
-                                    updateBooking(bookingId, {
-                                        status: 'completed',
-                                    })
+                                    // Process booking completion and handle payments
+                                    completeBookingPayment(bookingId)
 
                                     // Update local state
                                     setBookings((prev) =>
@@ -595,12 +595,14 @@ const ProviderBookings: React.FC = () => {
                                 >
                                     <div className="mb-4 flex items-start justify-between">
                                         <div className="flex items-center space-x-4">
-                                            <img
+                                            <Image
                                                 src={
                                                     customer.img ||
                                                     '/img/p1.jpg'
                                                 }
                                                 alt={customer.firstName}
+                                                width={64}
+                                                height={64}
                                                 className="h-16 w-16 rounded-full object-cover"
                                             />
                                             <div>

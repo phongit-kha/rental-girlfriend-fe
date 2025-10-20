@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback } from 'react'
+import Image from 'next/image'
 import {
     Calendar,
     Clock,
@@ -54,7 +55,7 @@ const Bookings: React.FC = () => {
             })
 
             setProviders(userData)
-        } catch (error) {
+        } catch {
             toast.error('ไม่สามารถโหลดข้อมูลการจองได้')
         }
     }, [user])
@@ -64,7 +65,7 @@ const Bookings: React.FC = () => {
         initializeSampleData()
 
         if (user && isAuthenticated) {
-            loadBookings()
+            void loadBookings()
         }
     }, [user, isAuthenticated, loadBookings])
 
@@ -178,10 +179,10 @@ const Bookings: React.FC = () => {
                                             duration: 4000,
                                         }
                                     )
-                                } catch (error: any) {
+                                } catch (error: unknown) {
                                     toast.dismiss(processingToast)
                                     toast.error(
-                                        error.message ||
+                                        (error as Error).message ??
                                             'เกิดข้อผิดพลาดในการยกเลิกการจอง'
                                     )
                                 }
@@ -350,12 +351,14 @@ const Bookings: React.FC = () => {
                                 >
                                     <div className="mb-4 flex items-start justify-between">
                                         <div className="flex items-center space-x-4">
-                                            <img
+                                            <Image
                                                 src={
                                                     provider.img ||
                                                     '/img/p1.jpg'
                                                 }
                                                 alt={provider.firstName}
+                                                width={64}
+                                                height={64}
                                                 className="h-16 w-16 rounded-full object-cover"
                                             />
                                             <div>

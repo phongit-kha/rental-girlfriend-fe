@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Calendar, Clock, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuthContext } from '@/contexts/AuthContext'
 import {
     getServices,
     getUsers,
-    createBooking,
     initializeSampleData,
     type Service,
     type User,
@@ -343,12 +343,37 @@ export default function BookingPage() {
                                         type="time"
                                         id="startTime"
                                         value={bookingData.startTime}
-                                        onChange={(e) =>
+                                        onChange={(e) => {
+                                            const newStartTime = e.target.value
                                             setBookingData((prev) => ({
                                                 ...prev,
-                                                startTime: e.target.value,
+                                                startTime: newStartTime,
                                             }))
-                                        }
+
+                                            // Calculate duration immediately when start time changes
+                                            if (
+                                                newStartTime &&
+                                                bookingData.endTime
+                                            ) {
+                                                const start = new Date(
+                                                    `2000-01-01 ${newStartTime}`
+                                                )
+                                                const end = new Date(
+                                                    `2000-01-01 ${bookingData.endTime}`
+                                                )
+
+                                                if (end > start) {
+                                                    const duration =
+                                                        (end.getTime() -
+                                                            start.getTime()) /
+                                                        (1000 * 60 * 60)
+                                                    setBookingData((prev) => ({
+                                                        ...prev,
+                                                        duration,
+                                                    }))
+                                                }
+                                            }
+                                        }}
                                         className={`w-full rounded-xl border px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-pink-500 ${
                                             errors.startTime
                                                 ? 'border-red-300'
@@ -374,12 +399,40 @@ export default function BookingPage() {
                                             type="time"
                                             id="endTime"
                                             value={bookingData.endTime}
-                                            onChange={(e) =>
+                                            onChange={(e) => {
+                                                const newEndTime =
+                                                    e.target.value
                                                 setBookingData((prev) => ({
                                                     ...prev,
-                                                    endTime: e.target.value,
+                                                    endTime: newEndTime,
                                                 }))
-                                            }
+
+                                                // Calculate duration immediately when end time changes
+                                                if (
+                                                    bookingData.startTime &&
+                                                    newEndTime
+                                                ) {
+                                                    const start = new Date(
+                                                        `2000-01-01 ${bookingData.startTime}`
+                                                    )
+                                                    const end = new Date(
+                                                        `2000-01-01 ${newEndTime}`
+                                                    )
+
+                                                    if (end > start) {
+                                                        const duration =
+                                                            (end.getTime() -
+                                                                start.getTime()) /
+                                                            (1000 * 60 * 60)
+                                                        setBookingData(
+                                                            (prev) => ({
+                                                                ...prev,
+                                                                duration,
+                                                            })
+                                                        )
+                                                    }
+                                                }
+                                            }}
                                             className={`w-full rounded-xl border px-4 py-3 focus:border-transparent focus:ring-2 focus:ring-pink-500 ${
                                                 errors.endTime
                                                     ? 'border-red-300'
@@ -439,9 +492,11 @@ export default function BookingPage() {
                                 ผู้ให้บริการ
                             </h3>
                             <div className="flex items-center space-x-4">
-                                <img
+                                <Image
                                     src={provider.img || '/img/p1.jpg'}
                                     alt={provider.firstName}
+                                    width={64}
+                                    height={64}
                                     className="h-16 w-16 rounded-full object-cover"
                                 />
                                 <div>
@@ -490,18 +545,15 @@ export default function BookingPage() {
                                         </span>
                                     </div>
                                     <div className="mt-1 flex justify-between text-sm text-gray-600">
-                                        <span>มัดจำ (50%)</span>
+                                        <span>ชำระเต็มจำนวน (100%)</span>
                                         <span>
                                             ฿
-                                            {Math.floor(
-                                                calculateDeposit() * 0.5
-                                            ).toLocaleString()}
+                                            {calculateDeposit().toLocaleString()}
                                         </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        ร{' '}
                     </div>
                 </div>
             </div>

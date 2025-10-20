@@ -41,7 +41,7 @@ export default function ServicePage() {
             }
         }
 
-        loadData()
+        void loadData()
     }, [])
     return (
         <main className={`${kanit.className} bg-[#F4F6F8]`}>

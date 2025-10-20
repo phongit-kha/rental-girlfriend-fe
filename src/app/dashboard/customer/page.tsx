@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import {
     Wallet,
@@ -11,7 +11,6 @@ import {
     Minus,
     Filter,
     Calendar,
-    CreditCard,
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -51,24 +50,7 @@ export default function CustomerDashboard() {
     const [topUpAmount, setTopUpAmount] = useState('')
     const [isProcessingTopUp, setIsProcessingTopUp] = useState(false)
 
-    useEffect(() => {
-        initializeSampleData()
-
-        if (!isAuthenticated) {
-            router.push('/login')
-            return
-        }
-
-        if (!user || user.type !== 'customer') {
-            toast.error('เฉพาะลูกค้าเท่านั้นที่สามารถเข้าถึงหน้านี้ได้')
-            router.push('/')
-            return
-        }
-
-        loadData()
-    }, [user, isAuthenticated, router])
-
-    const loadData = async () => {
+    const loadData = useCallback(async () => {
         if (!user) return
 
         setLoading(true)
@@ -84,12 +66,29 @@ export default function CustomerDashboard() {
                 limit: 50,
             })
             setTransactions(transactionHistory)
-        } catch (error) {
+        } catch {
             toast.error('ไม่สามารถโหลดข้อมูลได้')
         } finally {
             setLoading(false)
         }
-    }
+    }, [user])
+
+    useEffect(() => {
+        initializeSampleData()
+
+        if (!isAuthenticated) {
+            router.push('/login')
+            return
+        }
+
+        if (!user || user.type !== 'customer') {
+            toast.error('เฉพาะลูกค้าเท่านั้นที่สามารถเข้าถึงหน้านี้ได้')
+            router.push('/')
+            return
+        }
+
+        void loadData()
+    }, [user, isAuthenticated, router, loadData])
 
     const filteredTransactions = transactions.filter(
         (t) => filterType === 'all' || t.type === filterType
@@ -124,7 +123,7 @@ export default function CustomerDashboard() {
             // Simulate API delay for withdrawal processing
             await new Promise((resolve) => setTimeout(resolve, 2500))
 
-            await processWithdrawal(
+            processWithdrawal(
                 user.id,
                 amount,
                 withdrawalForm.bankName,
@@ -141,10 +140,12 @@ export default function CustomerDashboard() {
                 accountNumber: '',
                 accountName: '',
             })
-            loadData()
-        } catch (error: any) {
+            void loadData()
+        } catch (error: unknown) {
             toast.dismiss(processingToast)
-            toast.error(error.message || 'เกิดข้อผิดพลาดในการถอนเงิน')
+            toast.error(
+                (error as Error).message ?? 'เกิดข้อผิดพลาดในการถอนเงิน'
+            )
         } finally {
             setIsProcessingWithdrawal(false)
         }
@@ -176,10 +177,12 @@ export default function CustomerDashboard() {
             toast.success('เติมเงินสำเร็จ!')
             setShowTopUpModal(false)
             setTopUpAmount('')
-            loadData()
-        } catch (error: any) {
+            void loadData()
+        } catch (error: unknown) {
             toast.dismiss(processingToast)
-            toast.error(error.message || 'เกิดข้อผิดพลาดในการเติมเงิน')
+            toast.error(
+                (error as Error).message ?? 'เกิดข้อผิดพลาดในการเติมเงิน'
+            )
         } finally {
             setIsProcessingTopUp(false)
         }
@@ -245,7 +248,7 @@ export default function CustomerDashboard() {
                             <div>
                                 <p className="text-pink-100">ยอดเงินคงเหลือ</p>
                                 <p className="text-3xl font-bold">
-                                    ฿{balance?.balance.toLocaleString() || '0'}
+                                    ฿{balance?.balance.toLocaleString() ?? '0'}
                                 </p>
                             </div>
                             <Wallet className="h-12 w-12 text-pink-200" />
@@ -260,7 +263,7 @@ export default function CustomerDashboard() {
                                 </p>
                                 <p className="text-2xl font-bold text-gray-900">
                                     ฿
-                                    {balance?.totalSpent.toLocaleString() ||
+                                    {balance?.totalSpent.toLocaleString() ??
                                         '0'}
                                 </p>
                             </div>

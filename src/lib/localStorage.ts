@@ -634,9 +634,12 @@ export const createTransaction = (
 ): Transaction => {
     const transactions = getTransactions()
 
+    // Generate unique ID using timestamp + random number to prevent duplicates
+    const uniqueId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
+
     const newTransaction: Transaction = {
         ...transactionData,
-        id: Date.now().toString(),
+        id: uniqueId,
         createdAt: new Date().toISOString(),
     }
 
@@ -854,7 +857,7 @@ export const cancelBookingWithRefund = (
             status: paymentStatus,
             refundAmount: refundToCustomer,
             refundReason:
-                reason ||
+                reason ??
                 `ยกเลิกโดย${cancelledBy === 'customer' ? 'ลูกค้า' : 'ผู้ให้บริการ'}`,
             refundedAt: new Date().toISOString(),
         })

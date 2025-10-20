@@ -14,11 +14,9 @@ import {
 
 export default function Alreadylogin() {
     const [messageCnt] = useState(4)
-    const [notifyCnt] = useState(10)
     const [showDropdown, setShowDropdown] = useState(false)
     const { user, logout, isProvider } = useAuthContext()
 
-    const notifyDisplay = notifyCnt > 9 ? '9+' : notifyCnt
     const messageCntDisplay = messageCnt > 9 ? '9+' : messageCnt
 
     return (

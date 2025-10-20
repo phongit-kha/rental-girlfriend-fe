@@ -25,6 +25,7 @@ type Props = {
     imgSrc: string
     buttonTitle: string
     Categories?: string[] // เพิ่ม categories prop
+    customButton?: React.ReactNode // เพิ่ม customButton prop สำหรับปุ่มที่กำหนดเอง
 }
 
 export default function Card({
@@ -42,6 +43,7 @@ export default function Card({
     imgSrc,
     buttonTitle,
     Categories = [], // เพิ่ม Categories prop พร้อม default value
+    customButton, // เพิ่ม customButton prop
 }: Props) {
     const router = useRouter()
     const priceHr = PriceHr.toLocaleString('th-TH')
@@ -122,10 +124,12 @@ export default function Card({
                             ฿ {priceD} / วัน
                         </div>
                     </div>
-                    <PrimaryButton
-                        title={buttonTitle}
-                        onClick={handleViewProfile}
-                    />
+                    {customButton ?? (
+                        <PrimaryButton
+                            title={buttonTitle}
+                            onClick={handleViewProfile}
+                        />
+                    )}
                 </div>
 
                 <hr className="border-0 border-t border-t-[#E1E7F4]/60" />

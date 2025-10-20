@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, useParams } from 'next/navigation'
+import Image from 'next/image'
 import { Clock, MapPin, Star, Calendar, Award } from 'lucide-react'
 import { useState, useEffect } from 'react'
 import {
@@ -68,7 +69,7 @@ export default function ServiceDetailPage() {
             }
         }
 
-        loadServiceData()
+        void loadServiceData()
     }, [id, router])
 
     const handleBooking = () => {
@@ -111,14 +112,15 @@ export default function ServiceDetailPage() {
                         {/* Header */}
                         <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
                             <div className="relative h-64">
-                                <img
+                                <Image
                                     src={
                                         service.images[0] ??
                                         provider.img ??
                                         '/img/p1.jpg'
                                     }
                                     alt={provider.firstName}
-                                    className="h-full w-full object-cover"
+                                    fill
+                                    className="object-cover"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                                 <div className="absolute bottom-6 left-6 text-white">

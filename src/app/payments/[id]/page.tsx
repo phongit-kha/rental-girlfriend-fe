@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { CreditCard, CheckCircle, ArrowLeft, Wallet } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -14,17 +15,31 @@ import {
     initializeSampleData,
     type Service,
     type User,
+    type UserBalance,
 } from '@/lib/localStorage'
+
+interface BookingFormData {
+    date: string
+    startTime: string
+    endTime?: string
+    duration?: number
+    serviceType: 'hourly' | 'daily'
+    specialRequests?: string
+    totalAmount: number
+    depositAmount: number
+}
 
 export default function PaymentPage() {
     const { id } = useParams()
     const router = useRouter()
     const { user, isAuthenticated } = useAuthContext()
 
+    const idString = Array.isArray(id) ? id[0] : id
+
     const [service, setService] = useState<Service | null>(null)
     const [provider, setProvider] = useState<User | null>(null)
-    const [bookingData, setBookingData] = useState<any>(null)
-    const [userBalance, setUserBalance] = useState<any>(null)
+    const [bookingData, setBookingData] = useState<BookingFormData | null>(null)
+    const [userBalance, setUserBalance] = useState<UserBalance | null>(null)
     const [loading, setLoading] = useState(true)
 
     const [paymentMethod, setPaymentMethod] = useState('credit_card')
@@ -53,19 +68,23 @@ export default function PaymentPage() {
         }
 
         // Get booking data from sessionStorage (passed from booking page)
-        const storedBookingData = sessionStorage.getItem(`bookingData_${id}`)
+        const storedBookingData = sessionStorage.getItem(
+            `bookingData_${idString}`
+        )
         if (!storedBookingData) {
             toast.error('ไม่พบข้อมูลการจอง กรุณาทำการจองใหม่')
-            router.push(`/booking/${id}`)
+            router.push(`/booking/${idString}`)
             return
         }
 
-        const parsedBookingData = JSON.parse(storedBookingData)
+        const parsedBookingData = JSON.parse(
+            storedBookingData
+        ) as BookingFormData
         setBookingData(parsedBookingData)
 
         // Load service data
         const services = getServices()
-        const foundService = services.find((s) => s.id === String(id))
+        const foundService = services.find((s) => s.id === idString)
 
         if (!foundService) {
             toast.error('ไม่พบบริการที่ต้องการ')
@@ -94,7 +113,7 @@ export default function PaymentPage() {
         setUserBalance(balance)
 
         setLoading(false)
-    }, [id, router, isAuthenticated, user])
+    }, [id, idString, router, isAuthenticated, user])
 
     const handlePayment = async () => {
         if (!service || !provider || !user || !bookingData) return
@@ -107,14 +126,13 @@ export default function PaymentPage() {
         })
 
         try {
-            // Calculate total amount (100% payment)
-            const totalAmount =
-                bookingData.serviceType === 'daily'
-                    ? service.priceDay
-                    : service.priceHour * bookingData.duration
+            if (!bookingData || !userBalance) {
+                throw new Error('ข้อมูลการจองหรือยอดเงินไม่ครบถ้วน')
+            }
 
-            // Calculate deposit amount (50%)
-            const depositAmount = Math.floor(totalAmount * 0.5)
+            // Use the total amount from booking data (100% payment)
+            const totalAmount = bookingData.totalAmount
+            const depositAmount = bookingData.depositAmount // This is already 100% from booking page
 
             // Handle wallet payment
             if (paymentMethod === 'wallet') {
@@ -135,7 +153,7 @@ export default function PaymentPage() {
             }
 
             // Create booking and payment after successful payment
-            const { booking } = createBookingAfterPayment(
+            createBookingAfterPayment(
                 {
                     customerId: user.id,
                     providerId: provider.id,
@@ -146,13 +164,13 @@ export default function PaymentPage() {
                     endTime:
                         bookingData.serviceType === 'daily'
                             ? '23:59'
-                            : bookingData.endTime,
+                            : (bookingData.endTime ?? '18:00'),
                     totalHours:
                         bookingData.serviceType === 'daily'
                             ? 8
-                            : bookingData.duration,
+                            : (bookingData.duration ?? 1),
                     totalAmount,
-                    depositAmount: depositAmount, // 50% deposit
+                    depositAmount: depositAmount, // 100% payment
                     status: 'pending',
                     specialRequests: bookingData.specialRequests,
                 },
@@ -171,7 +189,7 @@ export default function PaymentPage() {
             )
 
             // Clear booking data from sessionStorage
-            sessionStorage.removeItem(`bookingData_${id}`)
+            sessionStorage.removeItem(`bookingData_${idString}`)
 
             setPaymentComplete(true)
             setIsProcessing(false)
@@ -229,11 +247,9 @@ export default function PaymentPage() {
         )
     }
 
-    // Calculate amounts for display
-    const totalAmount =
-        bookingData.serviceType === 'daily'
-            ? service.priceDay
-            : service.priceHour * bookingData.duration
+    // Use amounts from booking data
+    const totalAmount = bookingData.totalAmount
+    const depositAmount = bookingData.depositAmount
 
     if (paymentComplete) {
         return (
@@ -323,14 +339,12 @@ export default function PaymentPage() {
                                         </div>
                                         <div className="text-sm text-gray-500">
                                             ยอดคงเหลือ: ฿
-                                            {userBalance?.balance.toLocaleString() ||
+                                            {userBalance?.balance.toLocaleString() ??
                                                 '0'}
                                         </div>
                                         {userBalance &&
                                             userBalance.balance <
-                                                Math.floor(
-                                                    totalAmount * 0.5
-                                                ) && (
+                                                depositAmount && (
                                                 <div className="text-sm text-red-500">
                                                     ยอดเงินไม่เพียงพอ
                                                 </div>
@@ -496,9 +510,11 @@ export default function PaymentPage() {
 
                             {/* Provider */}
                             <div className="mb-4 flex items-center space-x-3 border-b pb-4">
-                                <img
+                                <Image
                                     src={provider.img || '/img/p1.jpg'}
                                     alt={provider.firstName}
+                                    width={48}
+                                    height={48}
                                     className="h-12 w-12 rounded-full object-cover"
                                 />
                                 <div>
@@ -538,9 +554,8 @@ export default function PaymentPage() {
                                     </span>
                                     <span className="font-medium">
                                         {bookingData.serviceType === 'daily'
-                                            ? '8'
-                                            : bookingData.duration}{' '}
-                                        ชั่วโมง
+                                            ? '1 วัน (8 ชั่วโมง)'
+                                            : `${bookingData.duration} ชั่วโมง`}
                                     </span>
                                 </div>
                             </div>
@@ -571,12 +586,9 @@ export default function PaymentPage() {
                                     </div>
                                 </div>
                                 <div className="flex justify-between text-pink-600">
-                                    <span>เงินมัดจำ (50%)</span>
+                                    <span>ชำระเต็มจำนวน (100%)</span>
                                     <span className="font-semibold">
-                                        ฿
-                                        {Math.floor(
-                                            totalAmount * 0.5
-                                        ).toLocaleString()}
+                                        ฿{depositAmount.toLocaleString()}
                                     </span>
                                 </div>
                             </div>
@@ -588,9 +600,8 @@ export default function PaymentPage() {
                             disabled={
                                 isProcessing ||
                                 (paymentMethod === 'wallet' &&
-                                    userBalance &&
-                                    userBalance.balance <
-                                        Math.floor(totalAmount * 0.5))
+                                    userBalance !== null &&
+                                    userBalance.balance < depositAmount)
                             }
                             className="flex w-full items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 py-4 font-semibold text-white transition-all duration-200 hover:from-pink-600 hover:to-rose-600 disabled:opacity-50"
                         >
@@ -604,9 +615,7 @@ export default function PaymentPage() {
                                     <CreditCard className="h-5 w-5" />
                                     <span>
                                         ชำระเงิน ฿
-                                        {Math.floor(
-                                            totalAmount * 0.5
-                                        ).toLocaleString()}
+                                        {depositAmount.toLocaleString()}
                                     </span>
                                 </>
                             )}
