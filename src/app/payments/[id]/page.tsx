@@ -113,17 +113,20 @@ export default function PaymentPage() {
                     ? service.priceDay
                     : service.priceHour * bookingData.duration
 
+            // Calculate deposit amount (50%)
+            const depositAmount = Math.floor(totalAmount * 0.5)
+
             // Handle wallet payment
             if (paymentMethod === 'wallet') {
-                if (userBalance.balance < totalAmount) {
+                if (userBalance.balance < depositAmount) {
                     throw new Error('ยอดเงินในกระเป๋าไม่เพียงพอ')
                 }
 
                 // Pay with wallet
                 payWithWallet(
                     user.id,
-                    totalAmount,
-                    `ชำระเงิน - ${service.name}`,
+                    depositAmount,
+                    `ชำระเงินมัดจำ - ${service.name}`,
                     undefined // bookingId will be set after booking creation
                 )
             } else {
@@ -149,14 +152,14 @@ export default function PaymentPage() {
                             ? 8
                             : bookingData.duration,
                     totalAmount,
-                    depositAmount: totalAmount, // 100% payment
+                    depositAmount: depositAmount, // 50% deposit
                     status: 'pending',
                     specialRequests: bookingData.specialRequests,
                 },
                 {
                     customerId: user.id,
                     providerId: provider.id,
-                    amount: totalAmount,
+                    amount: depositAmount,
                     paymentMethod: paymentMethod as
                         | 'credit_card'
                         | 'promptpay'
@@ -325,7 +328,9 @@ export default function PaymentPage() {
                                         </div>
                                         {userBalance &&
                                             userBalance.balance <
-                                                totalAmount && (
+                                                Math.floor(
+                                                    totalAmount * 0.5
+                                                ) && (
                                                 <div className="text-sm text-red-500">
                                                     ยอดเงินไม่เพียงพอ
                                                 </div>
@@ -549,25 +554,30 @@ export default function PaymentPage() {
                             <div className="space-y-3">
                                 <div className="flex justify-between">
                                     <span className="text-gray-600">
-                                        ค่าบริการรวม
+                                        {bookingData.serviceType === 'daily'
+                                            ? 'ค่าบริการรายวัน'
+                                            : `ค่าบริการ ${bookingData.duration} ชั่วโมง`}
                                     </span>
                                     <span className="font-medium">
                                         ฿{totalAmount.toLocaleString()}
                                     </span>
                                 </div>
-                                <div className="flex justify-between text-pink-600">
-                                    <span>ชำระเต็มจำนวน (100%)</span>
-                                    <span className="font-semibold">
-                                        ฿{totalAmount.toLocaleString()}
-                                    </span>
-                                </div>
                                 <div className="border-t pt-3">
                                     <div className="flex justify-between text-lg font-bold">
-                                        <span>ยอดที่ต้องชำระ</span>
-                                        <span className="text-pink-600">
+                                        <span>รวมทั้งหมด</span>
+                                        <span className="text-gray-900">
                                             ฿{totalAmount.toLocaleString()}
                                         </span>
                                     </div>
+                                </div>
+                                <div className="flex justify-between text-pink-600">
+                                    <span>เงินมัดจำ (50%)</span>
+                                    <span className="font-semibold">
+                                        ฿
+                                        {Math.floor(
+                                            totalAmount * 0.5
+                                        ).toLocaleString()}
+                                    </span>
                                 </div>
                             </div>
                         </div>
@@ -579,7 +589,8 @@ export default function PaymentPage() {
                                 isProcessing ||
                                 (paymentMethod === 'wallet' &&
                                     userBalance &&
-                                    userBalance.balance < totalAmount)
+                                    userBalance.balance <
+                                        Math.floor(totalAmount * 0.5))
                             }
                             className="flex w-full items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 py-4 font-semibold text-white transition-all duration-200 hover:from-pink-600 hover:to-rose-600 disabled:opacity-50"
                         >
@@ -592,7 +603,10 @@ export default function PaymentPage() {
                                 <>
                                     <CreditCard className="h-5 w-5" />
                                     <span>
-                                        ชำระเงิน ฿{totalAmount.toLocaleString()}
+                                        ชำระเงิน ฿
+                                        {Math.floor(
+                                            totalAmount * 0.5
+                                        ).toLocaleString()}
                                     </span>
                                 </>
                             )}
