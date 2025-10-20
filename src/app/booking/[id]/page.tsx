@@ -135,7 +135,7 @@ export default function BookingPage() {
             // Simulate success
             setTimeout(() => {
                 alert('การจองสำเร็จ! กำลังไปยังหน้าชำระเงิน')
-                router.push(`/payment/${booking.id}`)
+                router.push(`/payments/${booking.id}`)
             }, 1000)
         } catch (error) {
             console.error('Booking error:', error)

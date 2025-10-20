@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useState } from 'react'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { ChevronDown, User, Settings, LogOut } from 'lucide-react'
+import { ChevronDown, User, Settings, LogOut, Calendar } from 'lucide-react'
 
 export default function Alreadylogin() {
     const [messageCnt] = useState(4)
@@ -75,6 +75,17 @@ export default function Alreadylogin() {
                         >
                             <User className="h-4 w-4" />
                             โปรไฟล์
+                        </Link>
+
+                        <Link
+                            href={
+                                isProvider ? '/bookings/provider' : '/bookings'
+                            }
+                            className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                            onClick={() => setShowDropdown(false)}
+                        >
+                            <Calendar className="h-4 w-4" />
+                            การจอง
                         </Link>
 
                         {isProvider && (
