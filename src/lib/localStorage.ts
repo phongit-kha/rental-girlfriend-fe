@@ -98,8 +98,22 @@ export interface Transaction {
     description: string
     bookingId?: string
     paymentId?: string
+    withdrawalId?: string
     status: 'pending' | 'completed' | 'failed'
     createdAt: string
+}
+
+export interface Withdrawal {
+    id: string
+    userId: string
+    amount: number
+    bankName: string
+    accountNumber: string
+    accountName: string
+    status: 'pending' | 'completed' | 'failed'
+    requestedAt: string
+    completedAt?: string
+    failureReason?: string
 }
 
 export interface UserBalance {
@@ -120,6 +134,7 @@ const BOOKINGS_KEY = 'rental_girlfriend_bookings'
 const PAYMENTS_KEY = 'rental_girlfriend_payments'
 const TRANSACTIONS_KEY = 'rental_girlfriend_transactions'
 const BALANCES_KEY = 'rental_girlfriend_balances'
+const WITHDRAWALS_KEY = 'rental_girlfriend_withdrawals'
 
 // Helper functions
 export const getUsers = (): User[] => {
@@ -216,6 +231,18 @@ export const getBalances = (): UserBalance[] => {
 export const setBalances = (balances: UserBalance[]): void => {
     if (typeof window === 'undefined') return
     localStorage.setItem(BALANCES_KEY, JSON.stringify(balances))
+}
+
+// Withdrawal management functions
+export const getWithdrawals = (): Withdrawal[] => {
+    if (typeof window === 'undefined') return []
+    const withdrawals = localStorage.getItem(WITHDRAWALS_KEY)
+    return withdrawals ? (JSON.parse(withdrawals) as Withdrawal[]) : []
+}
+
+export const setWithdrawals = (withdrawals: Withdrawal[]): void => {
+    if (typeof window === 'undefined') return
+    localStorage.setItem(WITHDRAWALS_KEY, JSON.stringify(withdrawals))
 }
 
 // User management functions
@@ -916,6 +943,166 @@ export const createBookingAfterPayment = (
     })
 
     return { booking, payment }
+}
+
+// Withdrawal functions
+export const createWithdrawal = (
+    withdrawalData: Omit<Withdrawal, 'id' | 'requestedAt'>
+): Withdrawal => {
+    const withdrawals = getWithdrawals()
+
+    const newWithdrawal: Withdrawal = {
+        ...withdrawalData,
+        id: Date.now().toString(),
+        requestedAt: new Date().toISOString(),
+    }
+
+    withdrawals.push(newWithdrawal)
+    setWithdrawals(withdrawals)
+
+    return newWithdrawal
+}
+
+export const processWithdrawal = (
+    userId: string,
+    amount: number,
+    bankName: string,
+    accountNumber: string,
+    accountName: string
+): Withdrawal => {
+    // Check if user has sufficient balance
+    const userBalance = getUserBalance(userId)
+    if (userBalance.balance < amount) {
+        throw new Error('ยอดเงินในบัญชีไม่เพียงพอสำหรับการถอน')
+    }
+
+    // Minimum withdrawal amount
+    if (amount < 100) {
+        throw new Error('จำนวนเงินขั้นต่ำในการถอนคือ ฿100')
+    }
+
+    // Create withdrawal request
+    const withdrawal = createWithdrawal({
+        userId,
+        amount,
+        bankName,
+        accountNumber,
+        accountName,
+        status: 'completed', // For demo purposes, auto-complete
+        completedAt: new Date().toISOString(),
+    })
+
+    // Deduct from user balance
+    updateUserBalance(userId, {
+        balance: userBalance.balance - amount,
+    })
+
+    // Create transaction record
+    createTransaction({
+        userId,
+        type: 'withdrawal',
+        amount: -amount,
+        description: `ถอนเงินไปยัง ${bankName} (${accountNumber})`,
+        withdrawalId: withdrawal.id,
+        status: 'completed',
+    })
+
+    return withdrawal
+}
+
+export const getWithdrawalsByUser = (userId: string): Withdrawal[] => {
+    const withdrawals = getWithdrawals()
+    return withdrawals.filter((w) => w.userId === userId)
+}
+
+// Top up balance function
+export const topUpBalance = (userId: string, amount: number): void => {
+    if (amount <= 0) {
+        throw new Error('จำนวนเงินต้องมากกว่า 0')
+    }
+
+    const userBalance = getUserBalance(userId)
+    updateUserBalance(userId, {
+        balance: userBalance.balance + amount,
+    })
+
+    createTransaction({
+        userId,
+        type: 'topup',
+        amount,
+        description: `เติมเงินเข้าบัญชี`,
+        status: 'completed',
+    })
+}
+
+// Enhanced transaction history with filtering
+export const getTransactionHistory = (
+    userId: string,
+    filters?: {
+        type?: Transaction['type']
+        startDate?: string
+        endDate?: string
+        limit?: number
+    }
+): Transaction[] => {
+    let transactions = getTransactionsByUser(userId)
+
+    if (filters?.type) {
+        transactions = transactions.filter((t) => t.type === filters.type)
+    }
+
+    if (filters?.startDate) {
+        transactions = transactions.filter(
+            (t) => new Date(t.createdAt) >= new Date(filters.startDate!)
+        )
+    }
+
+    if (filters?.endDate) {
+        transactions = transactions.filter(
+            (t) => new Date(t.createdAt) <= new Date(filters.endDate!)
+        )
+    }
+
+    // Sort by date (newest first)
+    transactions.sort(
+        (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+
+    if (filters?.limit) {
+        transactions = transactions.slice(0, filters.limit)
+    }
+
+    return transactions
+}
+
+// Pay with wallet balance
+export const payWithWallet = (
+    userId: string,
+    amount: number,
+    description: string,
+    bookingId?: string
+): void => {
+    const userBalance = getUserBalance(userId)
+    if (userBalance.balance < amount) {
+        throw new Error('ยอดเงินในกระเป๋าไม่เพียงพอ')
+    }
+
+    // Deduct from balance
+    updateUserBalance(userId, {
+        balance: userBalance.balance - amount,
+        totalSpent: userBalance.totalSpent + amount,
+    })
+
+    // Create transaction record
+    createTransaction({
+        userId,
+        type: 'payment',
+        amount: -amount,
+        description,
+        bookingId,
+        status: 'completed',
+    })
 }
 
 // Initialize sample data

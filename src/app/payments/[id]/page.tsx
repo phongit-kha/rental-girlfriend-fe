@@ -2,13 +2,15 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { CreditCard, CheckCircle, ArrowLeft } from 'lucide-react'
+import { CreditCard, CheckCircle, ArrowLeft, Wallet } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useAuthContext } from '@/contexts/AuthContext'
 import {
     getServices,
     getUsers,
     createBookingAfterPayment,
+    getUserBalance,
+    payWithWallet,
     initializeSampleData,
     type Service,
     type User,
@@ -22,6 +24,7 @@ export default function PaymentPage() {
     const [service, setService] = useState<Service | null>(null)
     const [provider, setProvider] = useState<User | null>(null)
     const [bookingData, setBookingData] = useState<any>(null)
+    const [userBalance, setUserBalance] = useState<any>(null)
     const [loading, setLoading] = useState(true)
 
     const [paymentMethod, setPaymentMethod] = useState('credit_card')
@@ -85,6 +88,11 @@ export default function PaymentPage() {
         }
 
         setProvider(foundProvider)
+
+        // Load user balance
+        const balance = getUserBalance(user.id)
+        setUserBalance(balance)
+
         setLoading(false)
     }, [id, router, isAuthenticated, user])
 
@@ -99,14 +107,29 @@ export default function PaymentPage() {
         })
 
         try {
-            // Simulate payment processing delay
-            await new Promise((resolve) => setTimeout(resolve, 2000))
-
             // Calculate total amount (100% payment)
             const totalAmount =
                 bookingData.serviceType === 'daily'
                     ? service.priceDay
                     : service.priceHour * bookingData.duration
+
+            // Handle wallet payment
+            if (paymentMethod === 'wallet') {
+                if (userBalance.balance < totalAmount) {
+                    throw new Error('ยอดเงินในกระเป๋าไม่เพียงพอ')
+                }
+
+                // Pay with wallet
+                payWithWallet(
+                    user.id,
+                    totalAmount,
+                    `ชำระเงิน - ${service.name}`,
+                    undefined // bookingId will be set after booking creation
+                )
+            } else {
+                // Simulate payment processing delay for other methods
+                await new Promise((resolve) => setTimeout(resolve, 2000))
+            }
 
             // Create booking and payment after successful payment
             const { booking } = createBookingAfterPayment(
@@ -273,7 +296,50 @@ export default function PaymentPage() {
                                 เลือกวิธีการชำระเงิน
                             </h3>
                             <div className="space-y-3">
-                                <label className="flex cursor-pointer items-center rounded-xl border-2 border-gray-200 p-4 transition-colors hover:border-pink-200">
+                                <label
+                                    className={`flex cursor-pointer items-center rounded-xl border-2 p-4 transition-colors hover:border-pink-200 ${
+                                        paymentMethod === 'wallet'
+                                            ? 'border-pink-500 bg-pink-50'
+                                            : 'border-gray-200'
+                                    }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="paymentMethod"
+                                        value="wallet"
+                                        checked={paymentMethod === 'wallet'}
+                                        onChange={(e) =>
+                                            setPaymentMethod(e.target.value)
+                                        }
+                                        className="text-pink-600 focus:ring-pink-500"
+                                    />
+                                    <Wallet className="mr-4 ml-3 h-6 w-6 text-gray-600" />
+                                    <div className="flex-1">
+                                        <div className="font-medium">
+                                            กระเป๋าเงิน
+                                        </div>
+                                        <div className="text-sm text-gray-500">
+                                            ยอดคงเหลือ: ฿
+                                            {userBalance?.balance.toLocaleString() ||
+                                                '0'}
+                                        </div>
+                                        {userBalance &&
+                                            userBalance.balance <
+                                                totalAmount && (
+                                                <div className="text-sm text-red-500">
+                                                    ยอดเงินไม่เพียงพอ
+                                                </div>
+                                            )}
+                                    </div>
+                                </label>
+
+                                <label
+                                    className={`flex cursor-pointer items-center rounded-xl border-2 p-4 transition-colors hover:border-pink-200 ${
+                                        paymentMethod === 'credit_card'
+                                            ? 'border-pink-500 bg-pink-50'
+                                            : 'border-gray-200'
+                                    }`}
+                                >
                                     <input
                                         type="radio"
                                         name="paymentMethod"
@@ -297,7 +363,13 @@ export default function PaymentPage() {
                                     </div>
                                 </label>
 
-                                <label className="flex cursor-pointer items-center rounded-xl border-2 border-gray-200 p-4 transition-colors hover:border-pink-200">
+                                <label
+                                    className={`flex cursor-pointer items-center rounded-xl border-2 p-4 transition-colors hover:border-pink-200 ${
+                                        paymentMethod === 'promptpay'
+                                            ? 'border-pink-500 bg-pink-50'
+                                            : 'border-gray-200'
+                                    }`}
+                                >
                                     <input
                                         type="radio"
                                         name="paymentMethod"
@@ -321,7 +393,13 @@ export default function PaymentPage() {
                                     </div>
                                 </label>
 
-                                <label className="flex cursor-pointer items-center rounded-xl border-2 border-gray-200 p-4 transition-colors hover:border-pink-200">
+                                <label
+                                    className={`flex cursor-pointer items-center rounded-xl border-2 p-4 transition-colors hover:border-pink-200 ${
+                                        paymentMethod === 'bank_transfer'
+                                            ? 'border-pink-500 bg-pink-50'
+                                            : 'border-gray-200'
+                                    }`}
+                                >
                                     <input
                                         type="radio"
                                         name="paymentMethod"
@@ -497,7 +575,12 @@ export default function PaymentPage() {
                         {/* Payment Button */}
                         <button
                             onClick={handlePayment}
-                            disabled={isProcessing}
+                            disabled={
+                                isProcessing ||
+                                (paymentMethod === 'wallet' &&
+                                    userBalance &&
+                                    userBalance.balance < totalAmount)
+                            }
                             className="flex w-full items-center justify-center space-x-2 rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 py-4 font-semibold text-white transition-all duration-200 hover:from-pink-600 hover:to-rose-600 disabled:opacity-50"
                         >
                             {isProcessing ? (

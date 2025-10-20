@@ -111,7 +111,7 @@ export default function ServiceMangePage() {
                                 บริการของฉัน
                             </div>
 
-                            <div className="flex flex-wrap content-center justify-start gap-4">
+                            <div className="grid grid-cols-3 content-center justify-start gap-4">
                                 {services.map((service) => {
                                     // คำนวณอายุจากวันเกิด
                                     const birthYear = new Date(
