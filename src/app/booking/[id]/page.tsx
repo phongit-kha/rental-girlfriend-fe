@@ -545,10 +545,12 @@ export default function BookingPage() {
                                         </span>
                                     </div>
                                     <div className="mt-1 flex justify-between text-sm text-gray-600">
-                                        <span>ชำระเต็มจำนวน (100%)</span>
+                                        <span>มัดจำ (50%)</span>
                                         <span>
                                             ฿
-                                            {calculateDeposit().toLocaleString()}
+                                            {(
+                                                calculateDeposit() * 0.5
+                                            ).toLocaleString()}
                                         </span>
                                     </div>
                                 </div>

@@ -586,9 +586,10 @@ export default function PaymentPage() {
                                     </div>
                                 </div>
                                 <div className="flex justify-between text-pink-600">
-                                    <span>ชำระเต็มจำนวน (100%)</span>
+                                    <span>มัดจำ (50%)</span>
                                     <span className="font-semibold">
-                                        ฿{depositAmount.toLocaleString()}
+                                        ฿
+                                        {(depositAmount * 0.5).toLocaleString()}
                                     </span>
                                 </div>
                             </div>
