@@ -2,25 +2,26 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Calendar, Clock, MessageSquare, AlertCircle } from 'lucide-react'
+import { Calendar, Clock, AlertCircle } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useAuthContext } from '@/contexts/AuthContext'
+import {
+    getServices,
+    getUsers,
+    createBooking,
+    initializeSampleData,
+    type Service,
+    type User,
+} from '@/lib/localStorage'
 
 export default function BookingPage() {
     const { id } = useParams()
     const router = useRouter()
+    const { user, isAuthenticated } = useAuthContext()
 
-    // Static provider data (replacing variables with plain text)
-    const provider = {
-        id: '1',
-        name: 'นางสาวสมใจ',
-        age: 24,
-        avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800',
-        rating: 4.8,
-        totalReviews: 156,
-        hourlyRate: 500,
-        dailyRate: 3000,
-        userType: 'provider',
-    }
+    const [service, setService] = useState<Service | null>(null)
+    const [provider, setProvider] = useState<User | null>(null)
+    const [loading, setLoading] = useState(true)
 
     const [bookingData, setBookingData] = useState({
         date: '',
@@ -34,20 +35,61 @@ export default function BookingPage() {
     const [errors, setErrors] = useState<Record<string, string>>({})
 
     useEffect(() => {
-        // Simple check - in real app would check authentication
+        // Initialize sample data if needed
+        initializeSampleData()
+
+        // Check authentication
+        if (!isAuthenticated) {
+            router.push('/login')
+            return
+        }
+
+        if (!user || user.type !== 'customer') {
+            toast.error('เฉพาะลูกค้าเท่านั้นที่สามารถจองบริการได้')
+            router.push('/services')
+            return
+        }
+
         if (!id) {
             router.push('/services')
             return
         }
-    }, [id, router])
+
+        // Load service data
+        const services = getServices()
+        const foundService = services.find((s) => s.id === String(id))
+
+        if (!foundService) {
+            toast.error('ไม่พบบริการที่ต้องการ')
+            router.push('/services')
+            return
+        }
+
+        setService(foundService)
+
+        // Load provider data
+        const users = getUsers()
+        const foundProvider = users.find(
+            (u) => u.id === foundService.providerId
+        )
+
+        if (!foundProvider) {
+            toast.error('ไม่พบผู้ให้บริการ')
+            router.push('/services')
+            return
+        }
+
+        setProvider(foundProvider)
+        setLoading(false)
+    }, [id, router, isAuthenticated, user])
 
     const calculateTotal = () => {
-        if (!provider) return 0
+        if (!service) return 0
 
         if (bookingData.serviceType === 'daily') {
-            return provider.dailyRate
+            return service.priceDay
         } else {
-            return provider.hourlyRate * bookingData.duration
+            return service.priceHour * bookingData.duration
         }
     }
 
@@ -102,7 +144,7 @@ export default function BookingPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (!validateForm() || !provider) return
+        if (!validateForm() || !service || !provider || !user) return
 
         setIsLoading(true)
 
@@ -110,12 +152,12 @@ export default function BookingPage() {
             const totalAmount = calculateTotal()
             const depositAmount = calculateDeposit()
 
-            // Simulate booking creation
-            const booking = {
-                id: Date.now().toString(),
-                customerId: 'current-user-id',
+            // Create booking in localStorage
+            const booking = createBooking({
+                customerId: user.id,
                 providerId: provider.id,
-                serviceId: provider.id,
+                serviceId: service.id,
+                serviceName: service.name,
                 date: bookingData.date,
                 startTime: bookingData.startTime,
                 endTime:
@@ -131,11 +173,12 @@ export default function BookingPage() {
                 status: 'pending',
                 paymentStatus: 'pending',
                 specialRequests: bookingData.specialRequests,
-            }
+            })
 
-            // Simulate success
+            toast.success('สร้างการจองเรียบร้อยแล้ว!')
+
+            // Navigate to payment page
             setTimeout(() => {
-                // Show navigation toast
                 router.push(`/payments/${booking.id}`)
             }, 1000)
         } catch (error) {
@@ -143,15 +186,34 @@ export default function BookingPage() {
             setErrors({
                 general: 'เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่อีกครั้ง',
             })
+            toast.error('เกิดข้อผิดพลาดในการจอง')
         } finally {
             setIsLoading(false)
         }
     }
 
-    if (!provider) {
+    if (loading) {
         return (
             <div className="flex min-h-screen items-center justify-center">
                 <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-pink-500"></div>
+            </div>
+        )
+    }
+
+    if (!service || !provider) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                        ไม่พบบริการที่ต้องการ
+                    </h2>
+                    <button
+                        onClick={() => router.push('/services')}
+                        className="rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-3 font-semibold text-white transition-all hover:from-pink-600 hover:to-rose-600"
+                    >
+                        กลับไปหน้าบริการ
+                    </button>
+                </div>
             </div>
         )
     }
@@ -206,7 +268,7 @@ export default function BookingPage() {
                                         </div>
                                         <div className="text-sm text-gray-500">
                                             ฿
-                                            {provider.hourlyRate.toLocaleString()}
+                                            {service.priceHour.toLocaleString()}
                                             /ชั่วโมง
                                         </div>
                                     </button>
@@ -229,8 +291,7 @@ export default function BookingPage() {
                                             รายวัน
                                         </div>
                                         <div className="text-sm text-gray-500">
-                                            ฿
-                                            {provider.dailyRate.toLocaleString()}
+                                            ฿{service.priceDay.toLocaleString()}
                                             /วัน
                                         </div>
                                     </button>
@@ -379,23 +440,27 @@ export default function BookingPage() {
                             </h3>
                             <div className="flex items-center space-x-4">
                                 <img
-                                    src={provider.avatar}
-                                    alt={provider.name}
+                                    src={provider.img || '/img/p1.jpg'}
+                                    alt={provider.firstName}
                                     className="h-16 w-16 rounded-full object-cover"
                                 />
                                 <div>
                                     <div className="font-medium text-gray-900">
-                                        {provider.name}
+                                        {provider.firstName} {provider.lastName}
                                     </div>
                                     <div className="text-sm text-gray-500">
-                                        {provider.age} ปี
+                                        {new Date().getFullYear() -
+                                            new Date(
+                                                provider.birthdate
+                                            ).getFullYear()}{' '}
+                                        ปี
                                     </div>
                                     <div className="flex items-center space-x-1 text-yellow-500">
                                         <span className="text-sm">
-                                            ⭐ {provider.rating}
+                                            ⭐ {service.rating}
                                         </span>
                                         <span className="text-sm text-gray-500">
-                                            ({provider.totalReviews} รีวิว)
+                                            ({service.reviewCount} รีวิว)
                                         </span>
                                     </div>
                                 </div>

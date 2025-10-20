@@ -2,56 +2,92 @@
 
 import React, { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import {
-    CreditCard,
-    Shield,
-    CheckCircle,
-    AlertCircle,
-    ArrowLeft,
-} from 'lucide-react'
+import { CreditCard, CheckCircle, ArrowLeft } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useAuthContext } from '@/contexts/AuthContext'
+import {
+    getBookingById,
+    getUsers,
+    updateBooking,
+    createPayment,
+    createTransaction,
+    deductFromUserBalance,
+    initializeSampleData,
+    type Booking,
+    type User,
+} from '@/lib/localStorage'
 
 export default function PaymentPage() {
     const { id } = useParams()
     const router = useRouter()
+    const { user, isAuthenticated } = useAuthContext()
 
-    // Static booking data (replacing variables with plain text)
-    const booking = {
-        id: '1',
-        customerId: 'current-user-id',
-        providerId: '1',
-        date: '2024-12-25',
-        startTime: '14:00',
-        endTime: '18:00',
-        totalHours: 4,
-        totalAmount: 2000,
-        depositAmount: 1000,
-        status: 'pending',
-        paymentStatus: 'pending',
-        specialRequests: 'ต้องการไปดูหนัง',
-    }
-
-    // Static provider data (replacing variables with plain text)
-    const provider = {
-        id: '1',
-        name: 'นางสาวสมใจ',
-        avatar: 'https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800',
-        rating: 4.8,
-        totalReviews: 156,
-    }
+    const [booking, setBooking] = useState<Booking | null>(null)
+    const [provider, setProvider] = useState<User | null>(null)
+    const [loading, setLoading] = useState(true)
 
     const [paymentMethod, setPaymentMethod] = useState('credit_card')
     const [isProcessing, setIsProcessing] = useState(false)
     const [paymentComplete, setPaymentComplete] = useState(false)
 
     useEffect(() => {
-        if (!id) {
-            router.push('/services')
+        // Initialize sample data if needed
+        initializeSampleData()
+
+        // Check authentication
+        if (!isAuthenticated) {
+            router.push('/login')
             return
         }
-    }, [id, router])
+
+        if (!user || user.type !== 'customer') {
+            toast.error('เฉพาะลูกค้าเท่านั้นที่สามารถชำระเงินได้')
+            router.push('/bookings')
+            return
+        }
+
+        if (!id) {
+            router.push('/bookings')
+            return
+        }
+
+        // Load booking data
+        const foundBooking = getBookingById(String(id))
+
+        if (!foundBooking) {
+            toast.error('ไม่พบการจองที่ต้องการ')
+            router.push('/bookings')
+            return
+        }
+
+        // Check if this booking belongs to the current user
+        if (foundBooking.customerId !== user.id) {
+            toast.error('คุณไม่มีสิทธิ์เข้าถึงการจองนี้')
+            router.push('/bookings')
+            return
+        }
+
+        setBooking(foundBooking)
+
+        // Load provider data
+        const users = getUsers()
+        const foundProvider = users.find(
+            (u) => u.id === foundBooking.providerId
+        )
+
+        if (!foundProvider) {
+            toast.error('ไม่พบผู้ให้บริการ')
+            router.push('/bookings')
+            return
+        }
+
+        setProvider(foundProvider)
+        setLoading(false)
+    }, [id, router, isAuthenticated, user])
 
     const handlePayment = async () => {
+        if (!booking || !provider || !user) return
+
         setIsProcessing(true)
 
         // Show processing toast
@@ -59,8 +95,51 @@ export default function PaymentPage() {
             duration: Infinity,
         })
 
-        // Simulate payment processing
-        setTimeout(() => {
+        try {
+            // Simulate payment processing delay
+            await new Promise((resolve) => setTimeout(resolve, 2000))
+
+            // Create payment record
+            const payment = createPayment({
+                bookingId: booking.id,
+                customerId: user.id,
+                providerId: provider.id,
+                amount: booking.depositAmount,
+                paymentMethod: paymentMethod as
+                    | 'credit_card'
+                    | 'promptpay'
+                    | 'bank_transfer',
+                status: 'completed',
+                transactionId: `txn_${Date.now()}`,
+                completedAt: new Date().toISOString(),
+            })
+
+            // Update booking payment status
+            updateBooking(booking.id, {
+                paymentStatus: 'paid',
+            })
+
+            // Create transaction record for customer
+            createTransaction({
+                userId: user.id,
+                type: 'payment',
+                amount: -booking.depositAmount,
+                description: `ชำระเงินมัดจำ - ${booking.serviceName}`,
+                bookingId: booking.id,
+                paymentId: payment.id,
+                status: 'completed',
+            })
+
+            // Try to deduct from user balance (optional - if they have balance)
+            try {
+                deductFromUserBalance(user.id, booking.depositAmount)
+            } catch {
+                // If balance is insufficient, that's okay - payment was processed via other method
+                console.log(
+                    'Balance insufficient, payment processed via payment method'
+                )
+            }
+
             setPaymentComplete(true)
             setIsProcessing(false)
 
@@ -79,7 +158,42 @@ export default function PaymentPage() {
                     }
                 )
             }, 1000)
-        }, 3000)
+        } catch (error) {
+            console.error('Payment error:', error)
+            setIsProcessing(false)
+
+            // Dismiss processing toast and show error
+            toast.dismiss(processingToast)
+            toast.error('เกิดข้อผิดพลาดในการชำระเงิน กรุณาลองใหม่อีกครั้ง', {
+                duration: 4000,
+            })
+        }
+    }
+
+    if (loading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-pink-500"></div>
+            </div>
+        )
+    }
+
+    if (!booking || !provider) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                        ไม่พบการจองที่ต้องการ
+                    </h2>
+                    <button
+                        onClick={() => router.push('/bookings')}
+                        className="rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-3 font-semibold text-white transition-all hover:from-pink-600 hover:to-rose-600"
+                    >
+                        กลับไปหน้าการจอง
+                    </button>
+                </div>
+            </div>
+        )
     }
 
     if (paymentComplete) {
@@ -287,17 +401,16 @@ export default function PaymentPage() {
                             {/* Provider */}
                             <div className="mb-4 flex items-center space-x-3 border-b pb-4">
                                 <img
-                                    src={provider.avatar}
-                                    alt={provider.name}
+                                    src={provider.img || '/img/p1.jpg'}
+                                    alt={provider.firstName}
                                     className="h-12 w-12 rounded-full object-cover"
                                 />
                                 <div>
                                     <div className="font-medium">
-                                        {provider.name}
+                                        {provider.firstName} {provider.lastName}
                                     </div>
                                     <div className="text-sm text-gray-500">
-                                        ⭐ {provider.rating} (
-                                        {provider.totalReviews} รีวิว)
+                                        ผู้ให้บริการ
                                     </div>
                                 </div>
                             </div>

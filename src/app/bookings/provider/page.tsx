@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import {
     Calendar,
     Clock,
@@ -12,125 +12,36 @@ import {
     XCircle,
 } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { getUsers } from '@/lib/localStorage'
-import type { User as UserType } from '@/lib/localStorage'
+import {
+    getUsers,
+    getBookingsByProvider,
+    updateBooking,
+    initializeSampleData,
+    type User as UserType,
+    type Booking,
+} from '@/lib/localStorage'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
-
-// Mock booking interface
-interface Booking {
-    id: string
-    customerId: string
-    providerId: string
-    serviceId: string
-    serviceName: string
-    date: string
-    startTime: string
-    endTime: string
-    totalHours: number
-    totalAmount: number
-    depositAmount: number
-    status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
-    specialRequests?: string
-    createdAt: string
-}
-
-// Mock booking data for providers
-const mockProviderBookings: Booking[] = [
-    {
-        id: '1',
-        customerId: '4',
-        providerId: '1',
-        serviceId: '1',
-        serviceName: 'เดทดูหนังโรแมนติก',
-        date: '2024-12-25',
-        startTime: '19:00',
-        endTime: '22:00',
-        totalHours: 3,
-        totalAmount: 1500,
-        depositAmount: 750,
-        status: 'pending',
-        specialRequests: 'อยากดูหนังแอคชั่น ขอหนังที่มีซับไตเติลภาษาไทย',
-        createdAt: '2024-12-20T10:00:00Z',
-    },
-    {
-        id: '2',
-        customerId: '4',
-        providerId: '1',
-        serviceId: '4',
-        serviceName: 'งานสังคมและปาร์ตี้',
-        date: '2024-12-28',
-        startTime: '18:00',
-        endTime: '23:00',
-        totalHours: 5,
-        totalAmount: 3000,
-        depositAmount: 1500,
-        status: 'confirmed',
-        specialRequests:
-            'งานปาร์ตี้บริษัท ต้องแต่งตัวเป็นทางการ สีดำหรือน้ำเงินเข้ม',
-        createdAt: '2024-12-22T15:30:00Z',
-    },
-    {
-        id: '3',
-        customerId: '4',
-        providerId: '1',
-        serviceId: '1',
-        serviceName: 'เดทดูหนังโรแมนติก',
-        date: '2024-12-15',
-        startTime: '14:00',
-        endTime: '17:00',
-        totalHours: 3,
-        totalAmount: 1500,
-        depositAmount: 750,
-        status: 'completed',
-        specialRequests: 'อยากดูหนังโรแมนติก และทานป๊อปคอร์นรสคาราเมล',
-        createdAt: '2024-12-10T09:15:00Z',
-    },
-    {
-        id: '4',
-        customerId: '4',
-        providerId: '1',
-        serviceId: '4',
-        serviceName: 'งานสังคมและปาร์ตี้',
-        date: '2024-11-20',
-        startTime: '19:00',
-        endTime: '22:00',
-        totalHours: 3,
-        totalAmount: 1800,
-        depositAmount: 900,
-        status: 'cancelled',
-        specialRequests: 'งานเลี้ยงรุ่น ต้องแต่งตัวสบายๆ',
-        createdAt: '2024-11-15T14:20:00Z',
-    },
-]
 
 const ProviderBookings: React.FC = () => {
     const { user, isAuthenticated, isProvider } = useAuthContext()
     const [bookings, setBookings] = useState<Booking[]>([])
-    const [customers, setCustomers] = useState<{ [key: string]: UserType }>({})
+    const [customers, setCustomers] = useState<Record<string, UserType>>({})
     const [activeTab, setActiveTab] = useState<
         'pending' | 'confirmed' | 'completed' | 'cancelled'
     >('pending')
 
-    useEffect(() => {
-        if (user && isAuthenticated && isProvider) {
-            loadBookings()
-        }
-    }, [user, isAuthenticated, isProvider])
-
-    const loadBookings = () => {
+    const loadBookings = useCallback(() => {
         if (!user || user.type !== 'provider') return
 
-        // Filter bookings for current provider
-        const providerBookings = mockProviderBookings.filter(
-            (booking) => booking.providerId === user.id
-        )
+        // Get bookings for current provider
+        const providerBookings = getBookingsByProvider(user.id)
 
         setBookings(providerBookings)
 
         // Load customer data
         const users = getUsers()
-        const customerData: { [key: string]: UserType } = {}
+        const customerData: Record<string, UserType> = {}
 
         providerBookings.forEach((booking) => {
             const customer = users.find((u) => u.id === booking.customerId)
@@ -140,7 +51,16 @@ const ProviderBookings: React.FC = () => {
         })
 
         setCustomers(customerData)
-    }
+    }, [user])
+
+    useEffect(() => {
+        // Initialize sample data if needed
+        initializeSampleData()
+
+        if (user && isAuthenticated && isProvider) {
+            loadBookings()
+        }
+    }, [user, isAuthenticated, isProvider, loadBookings])
 
     const getStatusColor = (status: Booking['status']) => {
         switch (status) {
@@ -186,20 +106,33 @@ const ProviderBookings: React.FC = () => {
                     <div className="flex gap-2">
                         <button
                             onClick={() => {
-                                setBookings((prev) =>
-                                    prev.map((booking) =>
-                                        booking.id === bookingId
-                                            ? {
-                                                  ...booking,
-                                                  status: 'confirmed' as const,
-                                              }
-                                            : booking
+                                try {
+                                    // Update booking status in localStorage
+                                    updateBooking(bookingId, {
+                                        status: 'confirmed',
+                                    })
+
+                                    // Update local state
+                                    setBookings((prev) =>
+                                        prev.map((booking) =>
+                                            booking.id === bookingId
+                                                ? {
+                                                      ...booking,
+                                                      status: 'confirmed' as const,
+                                                  }
+                                                : booking
+                                        )
                                     )
-                                )
-                                toast.dismiss(t.id)
-                                toast.success('ยืนยันการจองเรียบร้อยแล้ว', {
-                                    duration: 3000,
-                                })
+                                    toast.dismiss(t.id)
+                                    toast.success('ยืนยันการจองเรียบร้อยแล้ว', {
+                                        duration: 3000,
+                                    })
+                                } catch {
+                                    toast.dismiss(t.id)
+                                    toast.error(
+                                        'เกิดข้อผิดพลาดในการยืนยันการจอง'
+                                    )
+                                }
                             }}
                             className="rounded bg-green-600 px-3 py-1 text-sm text-white hover:bg-green-700"
                         >
@@ -230,20 +163,33 @@ const ProviderBookings: React.FC = () => {
                     <div className="flex gap-2">
                         <button
                             onClick={() => {
-                                setBookings((prev) =>
-                                    prev.map((booking) =>
-                                        booking.id === bookingId
-                                            ? {
-                                                  ...booking,
-                                                  status: 'cancelled' as const,
-                                              }
-                                            : booking
+                                try {
+                                    // Update booking status in localStorage
+                                    updateBooking(bookingId, {
+                                        status: 'cancelled',
+                                    })
+
+                                    // Update local state
+                                    setBookings((prev) =>
+                                        prev.map((booking) =>
+                                            booking.id === bookingId
+                                                ? {
+                                                      ...booking,
+                                                      status: 'cancelled' as const,
+                                                  }
+                                                : booking
+                                        )
                                     )
-                                )
-                                toast.dismiss(t.id)
-                                toast.error('ปฏิเสธการจองเรียบร้อยแล้ว', {
-                                    duration: 3000,
-                                })
+                                    toast.dismiss(t.id)
+                                    toast.error('ปฏิเสธการจองเรียบร้อยแล้ว', {
+                                        duration: 3000,
+                                    })
+                                } catch {
+                                    toast.dismiss(t.id)
+                                    toast.error(
+                                        'เกิดข้อผิดพลาดในการปฏิเสธการจอง'
+                                    )
+                                }
                             }}
                             className="rounded bg-red-600 px-3 py-1 text-sm text-white hover:bg-red-700"
                         >
@@ -274,23 +220,36 @@ const ProviderBookings: React.FC = () => {
                     <div className="flex gap-2">
                         <button
                             onClick={() => {
-                                setBookings((prev) =>
-                                    prev.map((booking) =>
-                                        booking.id === bookingId
-                                            ? {
-                                                  ...booking,
-                                                  status: 'completed' as const,
-                                              }
-                                            : booking
+                                try {
+                                    // Update booking status in localStorage
+                                    updateBooking(bookingId, {
+                                        status: 'completed',
+                                    })
+
+                                    // Update local state
+                                    setBookings((prev) =>
+                                        prev.map((booking) =>
+                                            booking.id === bookingId
+                                                ? {
+                                                      ...booking,
+                                                      status: 'completed' as const,
+                                                  }
+                                                : booking
+                                        )
                                     )
-                                )
-                                toast.dismiss(t.id)
-                                toast.success(
-                                    'ทำเครื่องหมายบริการเสร็จสิ้นแล้ว! 🎉',
-                                    {
-                                        duration: 4000,
-                                    }
-                                )
+                                    toast.dismiss(t.id)
+                                    toast.success(
+                                        'ทำเครื่องหมายบริการเสร็จสิ้นแล้ว! 🎉',
+                                        {
+                                            duration: 4000,
+                                        }
+                                    )
+                                } catch {
+                                    toast.dismiss(t.id)
+                                    toast.error(
+                                        'เกิดข้อผิดพลาดในการอัปเดตสถานะ'
+                                    )
+                                }
                             }}
                             className="rounded bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
                         >
@@ -311,7 +270,7 @@ const ProviderBookings: React.FC = () => {
         )
     }
 
-    const handleSendMessage = (customerId: string) => {
+    const handleSendMessage = (_customerId: string) => {
         toast.success('เปิดหน้าแชท', {
             duration: 2000,
         })

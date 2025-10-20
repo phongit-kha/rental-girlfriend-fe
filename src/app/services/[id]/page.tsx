@@ -2,37 +2,92 @@
 
 import { useRouter, useParams } from 'next/navigation'
 import { Clock, MapPin, Star, Calendar, Award } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import {
+    getServices,
+    getUsers,
+    getReviews,
+    initializeSampleData,
+    type Service,
+    type User,
+    type Review,
+} from '@/lib/localStorage'
 
 export default function ServiceDetailPage() {
     const router = useRouter()
     const { id } = useParams()
+    const [service, setService] = useState<Service | null>(null)
+    const [provider, setProvider] = useState<User | null>(null)
+    const [reviews, setReviews] = useState<Review[]>([])
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        // Initialize sample data if needed
+        initializeSampleData()
+
+        if (!id) {
+            router.push('/services')
+            return
+        }
+
+        // Load service data
+        const services = getServices()
+        const foundService = services.find((s) => s.id === String(id))
+
+        if (!foundService) {
+            router.push('/services')
+            return
+        }
+
+        setService(foundService)
+
+        // Load provider data
+        const users = getUsers()
+        const foundProvider = users.find(
+            (u) => u.id === foundService.providerId
+        )
+        setProvider(foundProvider ?? null)
+
+        // Load reviews for this service
+        const allReviews = getReviews()
+        const serviceReviews = allReviews.filter(
+            (r) => r.serviceId === String(id)
+        )
+        setReviews(serviceReviews)
+
+        setLoading(false)
+    }, [id, router])
 
     const handleBooking = () => {
         // Navigate to booking page
         router.push(`/booking/${String(id)}`)
     }
 
-    // Mock reviews data
-    const reviews = [
-        {
-            id: 1,
-            rating: 5,
-            comment: 'บริการดีมาก น่ารักและเป็นกันเอง แนะนำเลยค่ะ',
-            createdAt: '2024-01-15',
-        },
-        {
-            id: 2,
-            rating: 4,
-            comment: 'สนุกดี เวลาผ่านไปเร็วมาก ขอบคุณสำหรับประสบการณ์ดีๆ',
-            createdAt: '2024-01-10',
-        },
-        {
-            id: 3,
-            rating: 5,
-            comment: 'ประทับใจมาก จะจองอีกแน่นอน',
-            createdAt: '2024-01-05',
-        },
-    ]
+    if (loading) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="h-32 w-32 animate-spin rounded-full border-b-2 border-pink-500"></div>
+            </div>
+        )
+    }
+
+    if (!service || !provider) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <h2 className="mb-4 text-2xl font-bold text-gray-900">
+                        ไม่พบบริการที่ต้องการ
+                    </h2>
+                    <button
+                        onClick={() => router.push('/services')}
+                        className="rounded-xl bg-gradient-to-r from-pink-500 to-rose-500 px-6 py-3 font-semibold text-white transition-all hover:from-pink-600 hover:to-rose-600"
+                    >
+                        กลับไปหน้าบริการ
+                    </button>
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -44,19 +99,29 @@ export default function ServiceDetailPage() {
                         <div className="overflow-hidden rounded-2xl bg-white shadow-sm">
                             <div className="relative h-64">
                                 <img
-                                    src="https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg?auto=compress&cs=tinysrgb&w=800"
-                                    alt="นางสาวสมใจ"
+                                    src={
+                                        service.images[0] ??
+                                        provider.img ??
+                                        '/img/p1.jpg'
+                                    }
+                                    alt={provider.firstName}
                                     className="h-full w-full object-cover"
                                 />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                                 <div className="absolute bottom-6 left-6 text-white">
                                     <h1 className="mb-2 text-3xl font-bold">
-                                        นางสาวสมใจ
+                                        {provider.firstName} {provider.lastName}
                                     </h1>
                                     <div className="flex items-center space-x-4 text-sm">
                                         <div className="flex items-center space-x-1">
                                             <Clock className="h-4 w-4" />
-                                            <span>24 ปี</span>
+                                            <span>
+                                                {new Date().getFullYear() -
+                                                    new Date(
+                                                        provider.birthdate
+                                                    ).getFullYear()}{' '}
+                                                ปี
+                                            </span>
                                         </div>
                                         <div className="flex items-center space-x-1">
                                             <MapPin className="h-4 w-4" />
@@ -64,7 +129,10 @@ export default function ServiceDetailPage() {
                                         </div>
                                         <div className="flex items-center space-x-1">
                                             <Star className="h-4 w-4 fill-current text-yellow-400" />
-                                            <span>4.8 (156 รีวิว)</span>
+                                            <span>
+                                                {service.rating} (
+                                                {service.reviewCount} รีวิว)
+                                            </span>
                                         </div>
                                     </div>
                                 </div>
@@ -74,14 +142,10 @@ export default function ServiceDetailPage() {
                         {/* About */}
                         <div className="rounded-2xl bg-white p-6 shadow-sm">
                             <h2 className="mb-4 text-xl font-semibold text-gray-900">
-                                รายละเอียด
+                                {service.name}
                             </h2>
                             <p className="mb-6 leading-relaxed text-gray-600">
-                                สวัสดีค่ะ ฉันชื่อสมใจ
-                                เป็นคนร่าเริงและชอบทำกิจกรรมต่างๆ ชอบดูหนัง
-                                ฟังเพลง และเที่ยวชมสถานที่ต่างๆ
-                                มีประสบการณ์ในการเป็นเพื่อนคู่คิดมาแล้วกว่า 2 ปี
-                                พร้อมให้คำปรึกษาและเป็นเพื่อนที่ดีให้กับทุกคน
+                                {service.description}
                             </p>
 
                             {/* Interests */}
@@ -90,21 +154,16 @@ export default function ServiceDetailPage() {
                                     ประเภทบริการ
                                 </h3>
                                 <div className="flex flex-wrap gap-2">
-                                    <span className="rounded-lg bg-pink-50 px-3 py-1 text-sm text-pink-600">
-                                        ดูหนัง
-                                    </span>
-                                    <span className="rounded-lg bg-pink-50 px-3 py-1 text-sm text-pink-600">
-                                        ฟังเพลง
-                                    </span>
-                                    <span className="rounded-lg bg-pink-50 px-3 py-1 text-sm text-pink-600">
-                                        เที่ยวชมสถานที่
-                                    </span>
-                                    <span className="rounded-lg bg-pink-50 px-3 py-1 text-sm text-pink-600">
-                                        อ่านหนังสือ
-                                    </span>
-                                    <span className="rounded-lg bg-pink-50 px-3 py-1 text-sm text-pink-600">
-                                        ถ่ายรูป
-                                    </span>
+                                    {service.categories.map(
+                                        (category, index) => (
+                                            <span
+                                                key={index}
+                                                className="rounded-lg bg-pink-50 px-3 py-1 text-sm text-pink-600"
+                                            >
+                                                {category}
+                                            </span>
+                                        )
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -118,10 +177,10 @@ export default function ServiceDetailPage() {
                                 <div className="flex items-center space-x-2">
                                     <Star className="h-5 w-5 fill-current text-yellow-400" />
                                     <span className="text-lg font-semibold">
-                                        4.8
+                                        {service.rating}
                                     </span>
                                     <span className="text-gray-500">
-                                        จาก 156 รีวิว
+                                        จาก {service.reviewCount} รีวิว
                                     </span>
                                 </div>
                             </div>
@@ -180,7 +239,7 @@ export default function ServiceDetailPage() {
                                         ต่อชั่วโมง
                                     </span>
                                     <span className="text-2xl font-bold text-gray-900">
-                                        ฿500
+                                        ฿{service.priceHour.toLocaleString()}
                                     </span>
                                 </div>
                                 <div className="flex items-center justify-between">
@@ -188,7 +247,7 @@ export default function ServiceDetailPage() {
                                         ต่อวัน (8 ชั่วโมง)
                                     </span>
                                     <span className="text-xl font-semibold text-gray-900">
-                                        ฿3,000
+                                        ฿{service.priceDay.toLocaleString()}
                                     </span>
                                 </div>
                             </div>
@@ -217,7 +276,9 @@ export default function ServiceDetailPage() {
                                             การจองทั้งหมด
                                         </span>
                                     </div>
-                                    <span className="font-semibold">124</span>
+                                    <span className="font-semibold">
+                                        {service.bookingCount}
+                                    </span>
                                 </div>
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center space-x-2">
@@ -226,7 +287,9 @@ export default function ServiceDetailPage() {
                                             คะแนนเฉลี่ย
                                         </span>
                                     </div>
-                                    <span className="font-semibold">4.8</span>
+                                    <span className="font-semibold">
+                                        {service.rating}
+                                    </span>
                                 </div>
                             </div>
                         </div>
