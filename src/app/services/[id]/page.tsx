@@ -1,32 +1,15 @@
 'use client'
 
-import { useState } from 'react'
-import {
-    Clock,
-    MapPin,
-    Star,
-    Heart,
-    Shield,
-    Calendar,
-    MessageCircle,
-    Award,
-} from 'lucide-react'
+import { useRouter, useParams } from 'next/navigation'
+import { Clock, MapPin, Star, Calendar, Award } from 'lucide-react'
 
 export default function ServiceDetailPage() {
-    const [isFavorite, setIsFavorite] = useState(false)
-
-    const toggleFavorite = () => {
-        setIsFavorite(!isFavorite)
-    }
+    const router = useRouter()
+    const { id } = useParams()
 
     const handleBooking = () => {
-        // Handle booking logic
-        console.log('Booking clicked')
-    }
-
-    const handleMessage = () => {
-        // Handle message logic
-        console.log('Message clicked')
+        // Navigate to booking page
+        router.push(`/booking/${String(id)}`)
     }
 
     // Mock reviews data
@@ -152,7 +135,8 @@ export default function ServiceDetailPage() {
                                         >
                                             <div className="mb-2 flex items-center justify-between">
                                                 <div className="flex items-center space-x-1">
-                                                    {[...Array(5)].map(
+                                                    {Array.from(
+                                                        { length: 5 },
                                                         (_, i) => (
                                                             <Star
                                                                 key={i}
