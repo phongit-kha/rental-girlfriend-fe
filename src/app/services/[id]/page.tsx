@@ -22,40 +22,53 @@ export default function ServiceDetailPage() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        // Initialize sample data if needed
-        initializeSampleData()
+        const loadServiceData = async () => {
+            // Initialize sample data if needed
+            initializeSampleData()
 
-        if (!id) {
-            router.push('/services')
-            return
+            if (!id) {
+                router.push('/services')
+                return
+            }
+
+            setLoading(true)
+
+            try {
+                // Simulate API delay for service data loading
+                await new Promise((resolve) => setTimeout(resolve, 600))
+
+                // Load service data
+                const services = getServices()
+                const foundService = services.find((s) => s.id === String(id))
+
+                if (!foundService) {
+                    router.push('/services')
+                    return
+                }
+
+                setService(foundService)
+
+                // Load provider data
+                const users = getUsers()
+                const foundProvider = users.find(
+                    (u) => u.id === foundService.providerId
+                )
+                setProvider(foundProvider ?? null)
+
+                // Load reviews for this service
+                const allReviews = getReviews()
+                const serviceReviews = allReviews.filter(
+                    (r) => r.serviceId === String(id)
+                )
+                setReviews(serviceReviews)
+            } catch (error) {
+                console.error('Error loading service data:', error)
+            } finally {
+                setLoading(false)
+            }
         }
 
-        // Load service data
-        const services = getServices()
-        const foundService = services.find((s) => s.id === String(id))
-
-        if (!foundService) {
-            router.push('/services')
-            return
-        }
-
-        setService(foundService)
-
-        // Load provider data
-        const users = getUsers()
-        const foundProvider = users.find(
-            (u) => u.id === foundService.providerId
-        )
-        setProvider(foundProvider ?? null)
-
-        // Load reviews for this service
-        const allReviews = getReviews()
-        const serviceReviews = allReviews.filter(
-            (r) => r.serviceId === String(id)
-        )
-        setReviews(serviceReviews)
-
-        setLoading(false)
+        loadServiceData()
     }, [id, router])
 
     const handleBooking = () => {

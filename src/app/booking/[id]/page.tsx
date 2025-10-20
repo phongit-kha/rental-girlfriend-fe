@@ -148,7 +148,15 @@ export default function BookingPage() {
 
         setIsLoading(true)
 
+        // Show loading toast
+        const processingToast = toast.loading('กำลังเตรียมข้อมูลการจอง...', {
+            duration: Infinity,
+        })
+
         try {
+            // Simulate form processing delay
+            await new Promise((resolve) => setTimeout(resolve, 1200))
+
             const totalAmount = calculateTotal()
             const depositAmount = calculateDeposit()
 
@@ -165,6 +173,7 @@ export default function BookingPage() {
                 JSON.stringify(bookingDataForPayment)
             )
 
+            toast.dismiss(processingToast)
             toast.success('ข้อมูลการจองพร้อมแล้ว!')
 
             // Navigate to payment page
@@ -173,6 +182,7 @@ export default function BookingPage() {
             }, 1000)
         } catch (error) {
             console.error('Booking error:', error)
+            toast.dismiss(processingToast)
             setErrors({
                 general: 'เกิดข้อผิดพลาดในการจอง กรุณาลองใหม่อีกครั้ง',
             })
@@ -480,10 +490,12 @@ export default function BookingPage() {
                                         </span>
                                     </div>
                                     <div className="mt-1 flex justify-between text-sm text-gray-600">
-                                        <span>ชำระเต็มจำนวน</span>
+                                        <span>มัดจำ (50%)</span>
                                         <span>
                                             ฿
-                                            {calculateDeposit().toLocaleString()}
+                                            {Math.floor(
+                                                calculateDeposit() * 0.5
+                                            ).toLocaleString()}
                                         </span>
                                     </div>
                                 </div>

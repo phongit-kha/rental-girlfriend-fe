@@ -80,7 +80,7 @@ export default function ProfilePage() {
         setDraft({ ...draft, [key]: value })
     }
 
-    const handleSave = (e: React.FormEvent) => {
+    const handleSave = async (e: React.FormEvent) => {
         e.preventDefault()
 
         if (!authUser) {
@@ -91,8 +91,16 @@ export default function ProfilePage() {
         const [firstName, ...lastNameParts] = draft.name.split(' ')
         const lastName = lastNameParts.join(' ') ?? ''
 
+        // Show loading toast
+        const processingToast = toast.loading('กำลังอัปเดตข้อมูลโปรไฟล์...', {
+            duration: Infinity,
+        })
+
         try {
             setIsUpdating(true) // Set flag to prevent useEffect from overriding
+
+            // Simulate API delay for profile update
+            await new Promise((resolve) => setTimeout(resolve, 1500))
 
             // อัปเดตใน localStorage
             const updatedUserData = updateUserInStorage(authUser.id, {
@@ -129,6 +137,7 @@ export default function ProfilePage() {
             setEditProfile(false) // ปิด edit mode หลังบันทึกสำเร็จ
 
             // Show success toast
+            toast.dismiss(processingToast)
             toast.success('อัปเดตข้อมูลโปรไฟล์สำเร็จ! ✅', {
                 duration: 3000,
             })
@@ -139,6 +148,7 @@ export default function ProfilePage() {
             }, 100)
         } catch (error) {
             setIsUpdating(false) // Reset flag on error
+            toast.dismiss(processingToast)
             toast.error(
                 error instanceof Error
                     ? error.message

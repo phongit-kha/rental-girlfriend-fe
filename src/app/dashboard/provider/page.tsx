@@ -65,21 +65,30 @@ export default function ProviderDashboard() {
         loadData()
     }, [user, isAuthenticated, isProvider, router])
 
-    const loadData = () => {
+    const loadData = async () => {
         if (!user) return
 
-        const userBalance = getUserBalance(user.id)
-        setBalance(userBalance)
+        setLoading(true)
 
-        const transactionHistory = getTransactionHistory(user.id, {
-            limit: 50,
-        })
-        setTransactions(transactionHistory)
+        try {
+            // Simulate API delay for data loading
+            await new Promise((resolve) => setTimeout(resolve, 800))
 
-        const providerBookings = getBookingsByProvider(user.id)
-        setBookings(providerBookings)
+            const userBalance = getUserBalance(user.id)
+            setBalance(userBalance)
 
-        setLoading(false)
+            const transactionHistory = getTransactionHistory(user.id, {
+                limit: 50,
+            })
+            setTransactions(transactionHistory)
+
+            const providerBookings = getBookingsByProvider(user.id)
+            setBookings(providerBookings)
+        } catch (error) {
+            toast.error('ไม่สามารถโหลดข้อมูลได้')
+        } finally {
+            setLoading(false)
+        }
     }
 
     const filteredTransactions = transactions.filter(
@@ -122,7 +131,15 @@ export default function ProviderDashboard() {
 
         setIsProcessingWithdrawal(true)
 
+        // Show loading toast
+        const processingToast = toast.loading('กำลังดำเนินการถอนเงิน...', {
+            duration: Infinity,
+        })
+
         try {
+            // Simulate API delay for withdrawal processing
+            await new Promise((resolve) => setTimeout(resolve, 2500))
+
             await processWithdrawal(
                 user.id,
                 amount,
@@ -131,6 +148,7 @@ export default function ProviderDashboard() {
                 withdrawalForm.accountName
             )
 
+            toast.dismiss(processingToast)
             toast.success('ถอนเงินสำเร็จ!')
             setShowWithdrawModal(false)
             setWithdrawalForm({
@@ -141,6 +159,7 @@ export default function ProviderDashboard() {
             })
             loadData()
         } catch (error: any) {
+            toast.dismiss(processingToast)
             toast.error(error.message || 'เกิดข้อผิดพลาดในการถอนเงิน')
         } finally {
             setIsProcessingWithdrawal(false)

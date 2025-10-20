@@ -19,16 +19,26 @@ export default function ServicePage() {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        const loadData = () => {
-            const allServices = getServices().filter(
-                (service) => service.active
-            )
-            const allUsers = getUsers().filter(
-                (user) => user.type === 'provider'
-            )
-            setServices(allServices)
-            setProviders(allUsers)
-            setLoading(false)
+        const loadData = async () => {
+            setLoading(true)
+
+            try {
+                // Simulate API delay for services data loading
+                await new Promise((resolve) => setTimeout(resolve, 600))
+
+                const allServices = getServices().filter(
+                    (service) => service.active
+                )
+                const allUsers = getUsers().filter(
+                    (user) => user.type === 'provider'
+                )
+                setServices(allServices)
+                setProviders(allUsers)
+            } catch (error) {
+                console.error('Error loading services data:', error)
+            } finally {
+                setLoading(false)
+            }
         }
 
         loadData()

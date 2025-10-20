@@ -29,27 +29,34 @@ const Bookings: React.FC = () => {
         'upcoming' | 'completed' | 'cancelled'
     >('upcoming')
 
-    const loadBookings = useCallback(() => {
+    const loadBookings = useCallback(async () => {
         if (!user) return
 
-        // Get bookings for current customer
-        const userBookings =
-            user.type === 'customer' ? getBookingsByCustomer(user.id) : []
+        try {
+            // Simulate API delay for booking data loading
+            await new Promise((resolve) => setTimeout(resolve, 500))
 
-        setBookings(userBookings)
+            // Get bookings for current customer
+            const userBookings =
+                user.type === 'customer' ? getBookingsByCustomer(user.id) : []
 
-        // Load provider data
-        const users = getUsers()
-        const userData: Record<string, UserType> = {}
+            setBookings(userBookings)
 
-        userBookings.forEach((booking) => {
-            const provider = users.find((u) => u.id === booking.providerId)
-            if (provider) {
-                userData[booking.providerId] = provider
-            }
-        })
+            // Load provider data
+            const users = getUsers()
+            const userData: Record<string, UserType> = {}
 
-        setProviders(userData)
+            userBookings.forEach((booking) => {
+                const provider = users.find((u) => u.id === booking.providerId)
+                if (provider) {
+                    userData[booking.providerId] = provider
+                }
+            })
+
+            setProviders(userData)
+        } catch (error) {
+            toast.error('ไม่สามารถโหลดข้อมูลการจองได้')
+        }
     }, [user])
 
     useEffect(() => {
@@ -124,8 +131,23 @@ const Bookings: React.FC = () => {
                     </p>
                     <div className="flex gap-2">
                         <button
-                            onClick={() => {
+                            onClick={async () => {
+                                toast.dismiss(t.id)
+
+                                // Show loading toast
+                                const processingToast = toast.loading(
+                                    'กำลังยกเลิกการจอง...',
+                                    {
+                                        duration: Infinity,
+                                    }
+                                )
+
                                 try {
+                                    // Simulate API delay for booking cancellation
+                                    await new Promise((resolve) =>
+                                        setTimeout(resolve, 1500)
+                                    )
+
                                     // Cancel booking with refund logic
                                     cancelBookingWithRefund(
                                         bookingId,
@@ -148,7 +170,8 @@ const Bookings: React.FC = () => {
                                                 : booking
                                         )
                                     )
-                                    toast.dismiss(t.id)
+
+                                    toast.dismiss(processingToast)
                                     toast.success(
                                         'ยกเลิกการจองเรียบร้อยแล้ว เงินจะถูกคืนให้ 50%',
                                         {
@@ -156,7 +179,7 @@ const Bookings: React.FC = () => {
                                         }
                                     )
                                 } catch (error: any) {
-                                    toast.dismiss(t.id)
+                                    toast.dismiss(processingToast)
                                     toast.error(
                                         error.message ||
                                             'เกิดข้อผิดพลาดในการยกเลิกการจอง'

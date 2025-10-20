@@ -68,17 +68,27 @@ export default function CustomerDashboard() {
         loadData()
     }, [user, isAuthenticated, router])
 
-    const loadData = () => {
+    const loadData = async () => {
         if (!user) return
 
-        const userBalance = getUserBalance(user.id)
-        setBalance(userBalance)
+        setLoading(true)
 
-        const transactionHistory = getTransactionHistory(user.id, {
-            limit: 50,
-        })
-        setTransactions(transactionHistory)
-        setLoading(false)
+        try {
+            // Simulate API delay for data loading
+            await new Promise((resolve) => setTimeout(resolve, 800))
+
+            const userBalance = getUserBalance(user.id)
+            setBalance(userBalance)
+
+            const transactionHistory = getTransactionHistory(user.id, {
+                limit: 50,
+            })
+            setTransactions(transactionHistory)
+        } catch (error) {
+            toast.error('ไม่สามารถโหลดข้อมูลได้')
+        } finally {
+            setLoading(false)
+        }
     }
 
     const filteredTransactions = transactions.filter(
@@ -105,7 +115,15 @@ export default function CustomerDashboard() {
 
         setIsProcessingWithdrawal(true)
 
+        // Show loading toast
+        const processingToast = toast.loading('กำลังดำเนินการถอนเงิน...', {
+            duration: Infinity,
+        })
+
         try {
+            // Simulate API delay for withdrawal processing
+            await new Promise((resolve) => setTimeout(resolve, 2500))
+
             await processWithdrawal(
                 user.id,
                 amount,
@@ -114,6 +132,7 @@ export default function CustomerDashboard() {
                 withdrawalForm.accountName
             )
 
+            toast.dismiss(processingToast)
             toast.success('ถอนเงินสำเร็จ!')
             setShowWithdrawModal(false)
             setWithdrawalForm({
@@ -124,6 +143,7 @@ export default function CustomerDashboard() {
             })
             loadData()
         } catch (error: any) {
+            toast.dismiss(processingToast)
             toast.error(error.message || 'เกิดข้อผิดพลาดในการถอนเงิน')
         } finally {
             setIsProcessingWithdrawal(false)
@@ -141,13 +161,24 @@ export default function CustomerDashboard() {
 
         setIsProcessingTopUp(true)
 
+        // Show loading toast
+        const processingToast = toast.loading('กำลังดำเนินการเติมเงิน...', {
+            duration: Infinity,
+        })
+
         try {
+            // Simulate API delay for top-up processing
+            await new Promise((resolve) => setTimeout(resolve, 1800))
+
             topUpBalance(user.id, amount)
+
+            toast.dismiss(processingToast)
             toast.success('เติมเงินสำเร็จ!')
             setShowTopUpModal(false)
             setTopUpAmount('')
             loadData()
         } catch (error: any) {
+            toast.dismiss(processingToast)
             toast.error(error.message || 'เกิดข้อผิดพลาดในการเติมเงิน')
         } finally {
             setIsProcessingTopUp(false)
