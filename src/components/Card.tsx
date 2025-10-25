@@ -11,7 +11,7 @@ import { isBase64Image } from '@/lib/imageUtils'
 const kanit = Kanit({ subsets: ['thai', 'latin'], weight: ['400', '700'] })
 
 type Props = {
-    id: string | number // เพิ่ม id prop สำหรับ navigation
+    id: string | number
     Name: string
     Age: number
     Rating: number
@@ -24,8 +24,8 @@ type Props = {
     ReviewCount: number
     imgSrc: string
     buttonTitle: string
-    Categories?: string[] // เพิ่ม categories prop
-    customButton?: React.ReactNode // เพิ่ม customButton prop สำหรับปุ่มที่กำหนดเอง
+    Categories?: string[]
+    customButton?: React.ReactNode
 }
 
 export default function Card({
@@ -42,8 +42,8 @@ export default function Card({
     ReviewCount,
     imgSrc,
     buttonTitle,
-    Categories = [], // เพิ่ม Categories prop พร้อม default value
-    customButton, // เพิ่ม customButton prop
+    Categories = [],
+    customButton,
 }: Props) {
     const router = useRouter()
     const priceHr = PriceHr.toLocaleString('th-TH')
