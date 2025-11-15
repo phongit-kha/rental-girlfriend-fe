@@ -16,11 +16,13 @@ import {
     getBookingsByCustomer,
     cancelBookingWithRefund,
     initializeSampleData,
+    getReviewByBooking,
     type User as UserType,
     type Booking,
 } from '@/lib/localStorage'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
+import ReviewModal from '@/components/ReviewModal'
 
 const Bookings: React.FC = () => {
     const { user, isAuthenticated } = useAuthContext()
@@ -29,6 +31,10 @@ const Bookings: React.FC = () => {
     const [activeTab, setActiveTab] = useState<
         'upcoming' | 'completed' | 'cancelled'
     >('upcoming')
+    const [reviewModalOpen, setReviewModalOpen] = useState(false)
+    const [selectedBookingId, setSelectedBookingId] = useState<string | null>(
+        null
+    )
 
     const loadBookings = useCallback(async () => {
         if (!user) return
@@ -206,12 +212,25 @@ const Bookings: React.FC = () => {
         )
     }
 
-    const handleReviewBooking = (_bookingId: string) => {
-        toast.success('เปิดหน้าให้รีวิว', {
-            duration: 2000,
-        })
-        // Here you would navigate to review page
-        // router.push(`/review/${bookingId}`)
+    const handleReviewBooking = (bookingId: string) => {
+        if (!user) return
+
+        // ตรวจสอบว่ามีรีวิวแล้วหรือยัง
+        const existingReview = getReviewByBooking(bookingId)
+        if (existingReview) {
+            toast.error('คุณได้รีวิวการจองนี้แล้ว', {
+                duration: 3000,
+            })
+            return
+        }
+
+        setSelectedBookingId(bookingId)
+        setReviewModalOpen(true)
+    }
+
+    const handleReviewSubmit = () => {
+        // Refresh bookings to update review status
+        void loadBookings()
     }
 
     const handleSendMessage = (_userId: string) => {
@@ -453,17 +472,37 @@ const Bookings: React.FC = () => {
                                             )}
 
                                             {booking.status === 'completed' && (
-                                                <button
-                                                    onClick={() =>
-                                                        handleReviewBooking(
-                                                            booking.id
-                                                        )
-                                                    }
-                                                    className="flex items-center space-x-2 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 px-4 py-2 text-white transition-all hover:from-pink-600 hover:to-rose-600"
-                                                >
-                                                    <Star className="h-4 w-4" />
-                                                    <span>ให้รีวิว</span>
-                                                </button>
+                                                <>
+                                                    {getReviewByBooking(
+                                                        booking.id
+                                                    ) ? (
+                                                        <button
+                                                            disabled
+                                                            className="flex items-center space-x-2 rounded-lg bg-gray-300 px-4 py-2 text-gray-600 cursor-not-allowed"
+                                                        >
+                                                            <Star className="h-4 w-4" />
+                                                            <span>รีวิวแล้ว</span>
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            onClick={() =>
+                                                                handleReviewBooking(
+                                                                    booking.id
+                                                                )
+                                                            }
+                                                            className="flex items-center space-x-2 rounded-lg bg-gradient-to-r from-pink-500 to-rose-500 px-4 py-2 text-white transition-all hover:from-pink-600 hover:to-rose-600"
+                                                        >
+                                                            <Star className="h-4 w-4" />
+                                                            <span>ให้รีวิว</span>
+                                                        </button>
+                                                    )}
+                                                    <Link
+                                                        href={`/bookings/${booking.id}`}
+                                                        className="flex items-center space-x-2 rounded-lg border border-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-50"
+                                                    >
+                                                        <span>ดูรายละเอียด</span>
+                                                    </Link>
+                                                </>
                                             )}
                                         </div>
                                     </div>
@@ -471,6 +510,24 @@ const Bookings: React.FC = () => {
                             )
                         })}
                     </div>
+                )}
+
+                {/* Review Modal */}
+                {selectedBookingId && user && (
+                    <ReviewModal
+                        open={reviewModalOpen}
+                        onClose={() => {
+                            setReviewModalOpen(false)
+                            setSelectedBookingId(null)
+                        }}
+                        bookingId={selectedBookingId}
+                        serviceId={
+                            bookings.find((b) => b.id === selectedBookingId)
+                                ?.serviceId ?? ''
+                        }
+                        customerId={user.id}
+                        onSubmit={handleReviewSubmit}
+                    />
                 )}
             </div>
         </div>
