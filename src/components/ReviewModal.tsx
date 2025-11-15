@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Star } from 'lucide-react'
 import Modal from './shared/Modal'
 import toast from 'react-hot-toast'
@@ -26,7 +26,6 @@ export default function ReviewModal({
     const [hoveredRating, setHoveredRating] = useState(0)
     const [comment, setComment] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
-    const starRefs = useRef<(HTMLDivElement | null)[]>([])
 
     // Reset form when modal opens/closes
     useEffect(() => {
@@ -140,9 +139,6 @@ export default function ReviewModal({
                                 <div
                                     key={star}
                                     className="relative inline-block"
-                                    ref={(el) => {
-                                        starRefs.current[star - 1] = el
-                                    }}
                                 >
                                     {/* Half star button (left half) */}
                                     <button

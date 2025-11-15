@@ -9,7 +9,6 @@ import {
     User,
     MessageCircle,
     Star,
-    AlertCircle,
     ArrowLeft,
 } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -22,19 +21,21 @@ import {
     type User as UserType,
     type Booking,
     type Review,
+    type Service,
 } from '@/lib/localStorage'
 import Link from 'next/link'
 import toast from 'react-hot-toast'
 import ReviewModal from '@/components/ReviewModal'
 
 export default function BookingDetailPage() {
-    const { id } = useParams()
+    const params = useParams()
+    const id = typeof params.id === 'string' ? params.id : null
     const router = useRouter()
     const { user, isAuthenticated } = useAuthContext()
 
     const [booking, setBooking] = useState<Booking | null>(null)
     const [provider, setProvider] = useState<UserType | null>(null)
-    const [service, setService] = useState<any>(null)
+    const [service, setService] = useState<Service | null>(null)
     const [review, setReview] = useState<Review | null>(null)
     const [loading, setLoading] = useState(true)
     const [reviewModalOpen, setReviewModalOpen] = useState(false)
@@ -55,7 +56,7 @@ export default function BookingDetailPage() {
             return
         }
 
-        if (!id || typeof id !== 'string') {
+        if (!id) {
             router.push('/bookings')
             return
         }
@@ -119,7 +120,7 @@ export default function BookingDetailPage() {
 
     const handleReviewSubmit = () => {
         // Reload review data
-        if (id && typeof id === 'string') {
+        if (id) {
             const reviewData = getReviewByBooking(id)
             setReview(reviewData)
         }
