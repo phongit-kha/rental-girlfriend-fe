@@ -137,6 +137,12 @@ export default function ProviderDashboard() {
             )
             return
         }
+        if (/\d/.test(withdrawalForm.bankName)) {
+            toast.error(
+                'ชื่อธนาคารต้องเป็นตัวอักษรเท่านั้น ไม่สามารถมีตัวเลขได้'
+            )
+            return
+        }
 
         setIsProcessingWithdrawal(true)
 
